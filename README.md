@@ -3,6 +3,8 @@
 [English](https://github.com/Maplemx/Agently/blob/main/README.md) | [中文](https://github.com/Maplemx/Agently/blob/main/README_CN.md)
 
 > 🥷 Author: Maplemx | 📧 Email: maplemx@gmail.com | 💬 WeChat: moxinapp
+>
+> 🐦 Twitter: [Synn_mo](https://twitter.com/Synn_Mo) | 🪧 Discord: [Agently Free Discussion](https://discord.gg/Gtke5eAW)
 > 
 >  ⁉️ [Report bugs or post your ideas here](https://github.com/Maplemx/Agently/issues)
 > 
