@@ -395,7 +395,7 @@ function setAgentRole () {
 
 然而，在计算机工程的视角，要让大语言模型能够用类似函数的方式在代码中无缝插入，我们需要更为结构化的回复输出。
 
-事实上，不仅仅是在计算机工程领域，我们会发现目前已知的绝大部分著名的提示词工程（Prompt Engineering）方法，比如one-shot/few-shots，思维链（CoT），思维树（ToT），Agent角色扮演橘色（Camel AI's Agent Role Play Decision）等等，都证明了一点：**如果你希望获得更高质量的回复结果，你发起的请求需要被更好地结构化表达**
+事实上，不仅仅是在计算机工程领域，我们会发现目前已知的绝大部分著名的提示词工程（Prompt Engineering）方法，比如one-shot/few-shots，思维链（CoT），思维树（ToT），Agent角色扮演决策（Camel AI's Agent Role Play Decision）等等，都证明了一点：**如果你希望获得更高质量的回复结果，你发起的请求需要被更好地结构化表达**
 
 在Agently中，提出了在提示词构造中三个重要的组成部分：
 
