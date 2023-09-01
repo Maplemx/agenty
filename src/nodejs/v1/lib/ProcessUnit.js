@@ -142,9 +142,13 @@ class ProcessRequest {
             this.debug(judgeResponse)
             judgeResponse = judgeResponse
                 .replace(/```.+\n/ig, '')
-                .replace('```', '')
+                .replaceAll('```', '')
+                .trim()
             try {
-                const parsedJudgeResponse = JSON.parse(judgeResponse)
+                let parsedJudgeResponse = JSON.parse(judgeResponse)
+                if(!Array.isArray(parsedJudgeResponse)) {
+                    parsedJudgeResponse = [].concat(parsedJudgeResponse)
+                }
                 if (parsedJudgeResponse.length > 0) {
                     const skillList = this.getSkillList()
                     let skillResponseMessage = { role: 'system', content: 'YOU MUST KNOW: \n\n' }
