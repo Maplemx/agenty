@@ -19,8 +19,9 @@ NodeJS版`v1.1.3`：[English](https://github.com/Maplemx/Agently/blob/main/doc/n
 >
 >  👥 微信讨论群：群二维码如遇过期，加群请加微信号maplemx
 >
-> <img src="https://github.com/Maplemx/Agently/assets/4413155/689a83a1-3374-4d7a-9926-2c5085a66dc4" width="128px" height="128px">
+> <img src="https://github.com/Maplemx/Agently/assets/4413155/d18af476-42cf-45ec-ae96-3855dc6a7178" width="128px" height="128px">
 > 
+
 
 
 
