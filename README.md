@@ -18,6 +18,7 @@
 
 Github项目地址：[https://github.com/Maplemx/Agently](https://github.com/Maplemx/Agently)
 
+<img width="1315" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/301729ea-8d26-4c40-9689-8e7c12a6ffbd">
 
 ## 让我们先来聊聊智能体（Agent）
 
@@ -36,6 +37,8 @@ Github项目地址：[https://github.com/Maplemx/Agently](https://github.com/Map
 然而作为基于大型语言模型进行工程应用开发的开发者，我们知道，如果只是通过对大型语言模型简单地发起请求，用户的这些诉求是很难被满足的。因为大型语言模型本身并不能具备记忆、角色设定管理、主动感知这些能力，我们只能通过在每次请求中，向它提供充足的信息、给出更详细的指示来完成。
 
 而如果我们要让用户依然能够用他们期待中的简单的交互方式去完成这些复杂的任务，就意味着我们需要在模型之上，构建出能够满足用户这种期待的工程结构体。而这个工程结构体就是我们所谓的智能体（Agent）
+
+<img width="822" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/c2870366-575d-4fdb-a847-83feb1328d83">
 
 如上图所示，智能体（Agent）基于大型语言模型提供的基础智力，通过不同的组件（Component）增强自身的能力，从而满足普通用户对大型语言模型的所有“幻觉”。
 
@@ -262,7 +265,7 @@ if __name__ == "__main__":
     print("WebSocket 服务已启动")
     tornado.ioloop.IOLoop.current().start()
 ```
-```json
+```python
 [Server端]
 Data Received: {'role': '亚瑟，一个具有古典骑士精神的西部冒险者，热情、豪爽、不拘小节', 'scene': '森林的深处传来未知的响动，让人毛骨悚然。吉尔斯的话还回荡在耳边：“如果要追寻那未知的宝藏，胆小的人，还是尽快打道回府吧！”你回头看看伙伴，大家已经疲惫不堪，前进还是撤退？他们等待你的回答。'}
 [Client端]
