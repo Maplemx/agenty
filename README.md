@@ -286,4 +286,4 @@ Data Received: {'role': '亚瑟，一个具有古典骑士精神的西部冒险�
 
 ## 面向Agent开发者：用组件化的方式增量开发扩展Component，增强Agent的能力
 
-（未完待续）
+（本部分内容仍在撰写中，感兴趣的朋友可以先查看[src/python/v3/plugins/agent_component](https://github.com/Maplemx/Agently/tree/main/src/python/v3/plugins/agent_component)的源代码了解设计思想）
