@@ -1,15 +1,23 @@
 # Agently 3.0-Alpha版介绍手册
 
-## 安装方法及项目信息
+> 🥷 作者：Maplemx ｜ 📧 Email：maplemx@gmail.com | 💬 微信：moxinapp
+>
+> ⁉️ [如果您发现了BUG，或者有好的点子，请在这里提交](https://github.com/Maplemx/Agently/issues)
+> 
+>  ⭐️ 如果您觉得这个项目对您有帮助，请转发给您身边对大语言模型应用开发感兴趣的朋友，并给项目加星，感谢您的肯定和支持！
+>
+>  👾 Discord群组邀请链接：[https://discord.gg/j9CvXXJG](https://discord.gg/ufEk56Rk)
+>
+>  👥 微信讨论群：群二维码如遇过期，加群请加微信号maplemx
+>
+> <img src="https://github.com/Maplemx/Agently/assets/4413155/d18af476-42cf-45ec-ae96-3855dc6a7178" width="128px" height="128px">
+> 
+
 
 3.0-Alpha版本安装方法：`pip install Agently==v3.0.0a4`
 
 Github项目地址：[https://github.com/Maplemx/Agently](https://github.com/Maplemx/Agently)
 
-或二维码扫码访问
-
-> 如果觉得项目很不错，请转发给您身边对大语言模型应用开发感兴趣的朋友，并给我们的项目点个⭐️
-> 
 
 ## 让我们先来聊聊智能体（Agent）
 
