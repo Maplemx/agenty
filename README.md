@@ -14,7 +14,7 @@
 > 
 
 
-3.0-Alpha版本安装方法：`pip install Agently==v3.0.0a4`
+3.0-Alpha版本安装方法：`pip install Agently==v3.0.0a5`
 
 Github项目地址：[https://github.com/Maplemx/Agently](https://github.com/Maplemx/Agently)
 
