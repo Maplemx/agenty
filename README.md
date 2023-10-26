@@ -9,7 +9,10 @@
 >  👾 Discord群组邀请链接：[https://discord.gg/j9CvXXJG](https://discord.gg/ufEk56Rk)
 >
 >  👥 微信讨论群：加群请加微信号maplemx
+>
+> <img width="180" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/11957280-f454-4948-ae2e-cdd700ee8dc3">
 > 
+
 
 
 3.0-Alpha版本安装方法：`pip install Agently==v3.0.0a5`
