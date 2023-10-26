@@ -8,9 +8,7 @@
 >
 >  👾 Discord群组邀请链接：[https://discord.gg/j9CvXXJG](https://discord.gg/ufEk56Rk)
 >
->  👥 微信讨论群：群二维码如遇过期，加群请加微信号maplemx
->
-> <img src="https://github.com/Maplemx/Agently/assets/4413155/d18af476-42cf-45ec-ae96-3855dc6a7178" width="128px" height="128px">
+>  👥 微信讨论群：加群请加微信号maplemx
 > 
 
 
