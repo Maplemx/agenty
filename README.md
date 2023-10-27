@@ -1,5 +1,7 @@
 # Agently 3.0-Alpha版介绍手册
 
+1.0及2.0版本说明手册可参见：[文档合集](https://github.com/Maplemx/Agently/tree/main/doc)
+
 > 🥷 作者：Maplemx ｜ 📧 Email：maplemx@gmail.com | 💬 微信：moxinapp
 >
 > ⁉️ [如果您发现了BUG，或者有好的点子，请在这里提交](https://github.com/Maplemx/Agently/issues)
