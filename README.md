@@ -10,9 +10,8 @@
 >
 >  👾 Discord群组邀请链接：[https://discord.gg/j9CvXXJG](https://discord.gg/ufEk56Rk)
 >
->  👥 微信讨论群：加群请加微信号maplemx
->
-> <img width="180" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/11957280-f454-4948-ae2e-cdd700ee8dc3">
+>  👥 微信讨论群：
+> <img width="180" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/5fe467bb-e1c4-4550-9eaa-c59dc3221f58">
 > 
 
 
