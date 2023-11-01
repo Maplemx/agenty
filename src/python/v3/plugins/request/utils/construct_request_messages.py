@@ -56,6 +56,6 @@ def construct_request_messages(request_runtime_ctx):
                 }
                 request_runtime_ctx.set("response:type", "JSON")
             else:
-                prompt_dict["OUTPUT"] = str(prompt_output_data)
+                prompt_dict["[OUTPUT REQUIERMENT]"] = str(prompt_output_data)
         request_messages.append({ "role": "user", "content": construct_prompt_from_dict(prompt_dict) })
     return request_messages
