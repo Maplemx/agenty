@@ -46,7 +46,7 @@ class Segment(componentABC):
                 self.add_segment_listener(name, listener, is_streaming=is_streaming, is_await=is_await)
             return self.agent
         else:
-            raise(f"[Agent Component: Segment] segment name '{ name }' has already been used.")
+            raise Exception(f"[Agent Component: Segment] segment name '{ name }' has already been used.")
 
     def add_segment_listener(self, name: str, listener: callable, *, is_streaming = False, is_await = False):
         if name in self.segments:
@@ -85,7 +85,7 @@ class Segment(componentABC):
                     .get_result_async()
                 fixed_result = json.loads(find_json(fixed_result))
             except Exception as e:
-                raise(f"[Agent Request] Error still occured when try to fix JSON decode error: { str(e) }")
+                raise Exception(f"[Agent Request] Error still occured when try to fix JSON decode error: { str(e) }")
         return fixed_result
 
     async def _suffix(self, event:str, data: any):
@@ -161,9 +161,14 @@ class Segment(componentABC):
                             asyncio.create_task(done_listener(segment_data))
                     else:
                         done_listener(segment_data)
-                self.response_buffer = ""
-                self.current_segment = ""
                 self.agent.request.response_cache["reply"] = self.response_segments_cache
+            if event == "response:finally":
+                # clean request runtime
+                self.segments = {}
+                self.response_segments_cache = {}
+                self.parse_stage = 0
+                self.current_segment = ""
+                self.response_buffer = ""
 
     def export(self):
         return {

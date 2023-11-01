@@ -6,14 +6,22 @@ def export():
     plugin_list = []
 
     dir_path = os.path.dirname(os.path.abspath(__file__))
+    dir_name = os.path.basename(dir_path)
     
+    # read config.ini
     config = configparser.ConfigParser()
     config.optionxform = str
     config.read(f"{ dir_path }/config.ini")
-    default_settings = dict(config["default settings"]) if "default settings" in config else None
-    module_name = config["plugins"]["module_name"]
-    exception_files = config["plugins"]["exception_files"] if "exception_files" in config["plugins"] else []
-    exception_dirs = config["plugins"]["exception_dirs"] if "exception_dirs" in config["plugins"] else []
+    config_is_not_empty = len(dict(config)) > 1
+    
+    # load configs
+    module_name = config["plugins"]["module_name"] if config_is_not_empty and "module_name" in config else dir_name
+    exception_files = set(config["plugins"]["exception_files"]) if config_is_not_empty and "exception_files" in config["plugins"] else set([])
+    exception_files.add("__init__.py")
+    exception_dirs = set(config["plugins"]["exception_dirs"]) if config_is_not_empty and "exception_dirs" in config["plugins"] else set([])
+    exception_dirs.add("utils")
+    default_settings = dict(config["default settings"]) if config_is_not_empty and "default settings" in config else None
+
     for item in os.listdir(dir_path):
         # import plugins in .py files
         if item.endswith('.py') and item not in exception_files:

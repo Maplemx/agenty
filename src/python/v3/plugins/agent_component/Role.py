@@ -12,12 +12,23 @@ class Role(componentABC):
         self.agent.plugin_manager.set_settings("component_toggles.Role", is_enabled)
         return self.agent
 
+    def set_name(self, name: str):
+        self.role_runtime_ctx.set("NAME", name)
+        return self.agent
+
     def set(self, key: any, value: any=None):
         if value is not None:
             self.role_runtime_ctx.set(key, value)
         else:
             self.role_runtime_ctx.set("ROLE", key)
         return self.agent
+
+    def update(self, key: any, value: any=None):
+        if value is not None:
+            self.role_runtime_ctx.update(key, value)
+        else:
+            self.role_runtime_ctx.update("ROLE", key)
+        return self.agent        
 
     def append(self, key: any, value: any=None):
         if value is not None:
@@ -33,11 +44,16 @@ class Role(componentABC):
             self.role_runtime_ctx.extend("ROLE", key)
         return self.agent
 
-    def save(self, role_name: str):
-        self.role_storage\
-            .set(role_name, self.role_runtime_ctx.get())\
-            .save()
-        return self.agent
+    def save(self, role_name: str=None):
+        if role_name == None:
+            role_name = self.role_runtime_ctx.get("NAME")
+        if role_name != None and role_name != "":
+            self.role_storage\
+                .set(role_name, self.role_runtime_ctx.get())\
+                .save()
+            return self.agent
+        else:
+            raise Exception("[Agent Component: Role] Role attr 'NAME' must be stated before save.")
 
     def load(self, role_name: str):
         role_data = self.role_storage.get(role_name)
@@ -59,7 +75,9 @@ class Role(componentABC):
             "suffix": None,
             "alias": {
                 "toggle_role": { "func": self.toggle },
+                "set_role_name": { "func": self.set_name },
                 "set_role": { "func": self.set },
+                "update_role": { "func": self.update },
                 "append_role": { "func": self.append },
                 "extend_role": { "func": self.extend },
                 "save_role": { "func": self.save },
