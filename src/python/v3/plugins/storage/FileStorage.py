@@ -7,9 +7,6 @@ class FileStorage(StorageABC):
         self.db_name = db_name
         if not os.path.exists("./file_storage"):
             os.mkdir("./file_storage")
-        if not os.path.exists(f"./file_storage/{ self.db_name }"):
-            os.mkdir(f"./file_storage/{ self.db_name }")
-        return
 
     def __load_from_file(self, table_name: str):
         if not os.path.exists(f"./file_storage/{ self.db_name }/{ table_name }.data"):
@@ -25,7 +22,9 @@ class FileStorage(StorageABC):
                     self.__save_to_file(table_name, {})
                     return {}
 
-    def __save_to_file(self, table_name: str, value: any):
+    def __save_to_file(self, table_name: str, value: any):        
+        if not os.path.exists(f"./file_storage/{ self.db_name }"):
+            os.mkdir(f"./file_storage/{ self.db_name }")
         if not isinstance(value, str):
             value = json.dumps(value)
         with open(f"./file_storage/{ self.db_name }/{ table_name }.data", "w") as file:
