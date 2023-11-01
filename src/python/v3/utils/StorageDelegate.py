@@ -16,6 +16,10 @@ class StorageDelegate(object):
         self.plugin_manager = plugin_manager
         return
 
+    def set_storage_type(self, storage_type: str):
+        self.plugin_manager.set_settings("storage_type", storage_type)
+        return self
+
     def __get_storage_plugin(self):
         storage_type = self.plugin_manager.get_settings("storage_type")
         return self.plugin_manager.get("storage", storage_type)(db_name = self.db_name)

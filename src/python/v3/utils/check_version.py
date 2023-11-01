@@ -1,5 +1,6 @@
 import json
 import asyncio
+import threading
 import aiohttp
 import importlib.metadata
 
@@ -7,7 +8,7 @@ async def check_version_async():
     current_version = importlib.metadata.version("Agently")
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"http://agently.cn/meta/api/latest?version={ current_version }",
+            f"http://agently.tech/meta/api/latest?version={ current_version }",
             headers = { "Content-Type": "application/json" },
         ) as response:
             try:
@@ -30,5 +31,14 @@ async def check_version_async():
             except Exception as e:
                 print(e)
 
-def check_version():
-    asyncio.run(check_version_async())
+def run_check_version():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(check_version_async())
+    loop.close()
+
+def check_version(global_storage, today):
+    thread = threading.Thread(target = run_check_version)
+    thread.start()
+    #thread.join()
+    global_storage.set("agently", "check_version_record", today)
