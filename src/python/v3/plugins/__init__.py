@@ -19,3 +19,11 @@ def install_plugins(plugin_manager):
                 raise Exception(f"[Plugin Manager] Function 'export' in '__init__.py' must return a list of tuple (<module name>, <plugin name>, <plugin method>).")
             if module_default_settings:
                 plugin_manager.update_settings(module_default_settings)
+
+def install(Agently):
+    install_plugins(Agently.global_plugin_manager)
+    Agently.facility.refresh_plugins()
+
+def install_to_agent(agent):
+    install_plugins(agent.plugin_manager)
+    agent.refresh_plugins()
