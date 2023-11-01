@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
-from ..utils import PluginManager, RuntimeCtx, StorageDelegate
-from ..global_plugin_manager import global_plugin_manager
+from ..utils import PluginManager, RuntimeCtx
+from .._global import global_plugin_manager, global_storage
 from .Agent import Agent
 
 class AgentFactory(object):
@@ -9,14 +9,11 @@ class AgentFactory(object):
         #runtime ctx
         self.agent_runtime_ctx = RuntimeCtx()
 
-        #load global plugins
+        #use plugin manager
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
 
-        #use storage delegate
-        self.storage = StorageDelegate(
-            db_name = "global",
-            plugin_manager = self.plugin_manager,
-        )
+        #use global storage
+        self.global_storage = global_storage
 
         #debug
         self.set_settings("is_debug", is_debug)
@@ -25,7 +22,7 @@ class AgentFactory(object):
         return Agent(
             agent_id = agent_id,
             parent_agent_runtime_ctx = self.agent_runtime_ctx,
-            global_storage = self.storage,
+            global_storage = self.global_storage,
             parent_plugin_manager = self.plugin_manager
         )
 
