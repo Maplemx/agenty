@@ -4,7 +4,7 @@ import json
 from configparser import ConfigParser
 
 from ..utils import RuntimeCtx, RuntimeCtxNamespace, PluginManager, AliasManager, to_json_desc, find_json
-from ..global_plugin_manager import global_plugin_manager
+from .._global import global_plugin_manager
 
 class Request(object):
     def __init__(
@@ -113,7 +113,7 @@ class Request(object):
                     fixed_result = json.loads(find_json(fixed_result))
                     return fixed_result
                 except Exception as e:
-                    raise(f"[Agent Request] Error still occured when try to fix JSON decode error: { str(e) }")
+                    raise Exception(f"[Agent Request] Error still occured when try to fix JSON decode error: { str(e) }")
         return self.response_cache["reply"]
 
     def get_result(self):
