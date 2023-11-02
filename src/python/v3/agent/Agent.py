@@ -52,7 +52,7 @@ class Agent(object):
         # Install Agent Components
         self.refresh_plugins()
 
-    def refresh_plugins():
+    def refresh_plugins(self):
         # Agent Components
         agent_components = self.plugin_manager.get("agent_component")
         component_toggles = self.plugin_manager.get_settings("component_toggles")
