@@ -1,7 +1,10 @@
 import datetime
 import json
 import asyncio
+import threading
+import queue
 from ..Request import Request
+from ..WebSocket import WebSocketServer
 from ..utils import RuntimeCtx, StorageDelegate, PluginManager, AliasManager, IdGenerator, to_json_desc, find_json, check_version
 
 class Agent(object):
@@ -12,10 +15,12 @@ class Agent(object):
         auto_save: bool=False,
         parent_agent_runtime_ctx: object,
         global_storage: object,
+        global_websocket_server: object,
         parent_plugin_manager: object,
     ):
         # Integrate
         self.global_storage = global_storage
+        self.global_websocket_server = global_websocket_server
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
         self.alias_manager = AliasManager(self)
         self.agent_runtime_ctx = RuntimeCtx(parent = parent_agent_runtime_ctx)
@@ -96,7 +101,7 @@ class Agent(object):
         self.plugin_manager.set_settings(settings_key, settings_value)
         return self
 
-    async def async_start(self):
+    async def start_async(self):
         is_debug = self.plugin_manager.get_settings("is_debug")
         # Auto Save Agent runtime_ctx
         if self.agent_runtime_ctx.get("agent_auto_save") ==  True:
@@ -166,5 +171,13 @@ class Agent(object):
         return self.request.response_cache["reply"]
 
     def start(self):
-        reply = asyncio.run(self.async_start())
+        reply_queue = queue.Queue()
+        def start_in_theard():
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            reply = asyncio.get_event_loop().run_until_complete(self.start_async())
+            reply_queue.put_nowait(reply)
+        theard = threading.Thread(target=start_in_theard)
+        theard.start()
+        theard.join()        
+        reply = reply_queue.get_nowait()
         return reply

@@ -1,5 +1,7 @@
 import os
 import asyncio
+import threading
+import queue
 import json
 from configparser import ConfigParser
 
@@ -117,7 +119,15 @@ class Request(object):
         return self.response_cache["reply"]
 
     def get_result(self):
-        reply = asyncio.run(self.get_result_async())
+        reply_queue = queue.Queue()
+        def start_in_theard():
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            reply = asyncio.get_event_loop().run_until_complete(self.get_result_async())
+            reply_queue.put_nowait(reply)
+        theard = threading.Thread(target=start_in_theard)
+        theard.start()
+        theard.join()        
+        reply = reply_queue.get_nowait()
         return reply
 
     def start(self):
