@@ -6,25 +6,25 @@ class NamespaceOps(object):
         self.data_ops = data_ops
         self.return_to = return_to if return_to else self
 
-    def assign(self, input_key:any, input_content: any=None):
-        if input_key and input_content == None:
-            if isinstance(input_key, dict):
-                return self.update(input_key)
-            elif isinstance(input_key, list):
-                return self.extend(input_key)
+    def assign(self, input:any, desc: any=None):
+        if input and desc == None:
+            if isinstance(input, dict):
+                return self.update(input)
+            elif isinstance(input, list):
+                return self.extend(input)
             else:
-                return self.set(input_key)
-        if input_key and input_content != None:
-            current_content = self.get(input_key)
+                return self.set(input)
+        if input and desc != None:
+            current_content = self.get(input)
             if isinstance(current_content, list):
-                if isinstance(input_content, list):
-                    return self.extend(input_key, input_content)
+                if isinstance(desc, list):
+                    return self.extend(input, desc)
                 else:
-                    return self.append(input_key, input_content)
-            elif isinstance(input_content, dict):
-                return self.update(input_key, input_content)
+                    return self.append(input, desc)
+            elif isinstance(desc, dict):
+                return self.update(input, desc)
             else:
-                return self.set(input_key, input_content)
+                return self.set(input, desc)
 
 
     def set(self, keys_with_dots: any, value: any=None):
