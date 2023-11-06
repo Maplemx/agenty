@@ -1,13 +1,15 @@
 from configparser import ConfigParser
 
 from ..utils import PluginManager, RuntimeCtx
-from .._global import global_plugin_manager, global_storage
+from .._global import global_plugin_manager, global_storage, global_websocket_server
 from .Agent import Agent
 
 class AgentFactory(object):
     def __init__(self, *, parent_plugin_manager:object = global_plugin_manager, is_debug = False):
         #runtime ctx
-        self.agent_runtime_ctx = RuntimeCtx()
+        self.factory_agent_runtime_ctx = RuntimeCtx()
+        self.settings = RuntimeCtx()
+        self.key_chain = RuntimeCtx()
 
         #use plugin manager
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
@@ -15,14 +17,18 @@ class AgentFactory(object):
         #use global storage
         self.global_storage = global_storage
 
+        #use global websocket server
+        self.global_websocket_server = global_websocket_server
+
         #debug
         self.set_settings("is_debug", is_debug)
 
     def create_agent(self, agent_id = None):
         return Agent(
             agent_id = agent_id,
-            parent_agent_runtime_ctx = self.agent_runtime_ctx,
+            parent_agent_runtime_ctx = self.factory_agent_runtime_ctx,
             global_storage = self.global_storage,
+            global_websocket_server = self.global_websocket_server,
             parent_plugin_manager = self.plugin_manager
         )
 

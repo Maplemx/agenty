@@ -181,3 +181,50 @@ class Agent(object):
         theard.join()        
         reply = reply_queue.get_nowait()
         return reply
+
+    def start_websocket_server(self):
+        is_debug = self.plugin_manager.get_settings("is_debug")
+
+        def alias_handler(data: any, response: callable):
+            try:
+                if isinstance(data["params"], dict):
+                    getattr(self, data["name"])(**data["params"])
+                elif isinstance(data["params"], (list, tuple, set)):
+                    getattr(self, data["name"])(*data["params"])
+                else:
+                    getattr(self, data["name"])(data["params"])
+                response("alias_done")
+            except Exception as e:
+                if is_debug:
+                    print("[Agent WebSocket Server] Error: ", str(e))
+        self.global_websocket_server.add_event_handler(self.agent_id, "alias", alias_handler)
+
+        def start_handler(data: any, response: callable):
+            def write_message(event: str, data: any):
+                try:
+                    response(event, data)
+                except Exception as e:
+                    if is_debug:
+                        print("[Agent WebSocket Server] Error", str(e))
+            self\
+                .on_delta(
+                    lambda data: write_message("delta", data)
+                )\
+                .on_done(
+                    lambda data: write_message("done", data)
+                )\
+                .start()
+        self.global_websocket_server.add_event_handler(self.agent_id, "start", start_handler)
+
+        if is_debug:
+            print(f"[WebSocket Server] Event listeners of agent '{ self.agent_id }' are on.")
+
+        if self.global_websocket_server.status == 0:
+            if is_debug:
+                print(f"[WebSocket Server] WebSocket server started at { self.global_websocket_server.host }:{ self.global_websocket_server.port }.")
+            self.global_websocket_server.start()            
+
+    def stop_websocket_server(self):
+        self.global_websocket_server.remove_event_handler(self.agent_id)
+        if self.plugin_manager.get_settings("is_debug"):
+            print(f"[WebSocket Server] Agent '{ self.agent_id } websocket server stoped.'")
