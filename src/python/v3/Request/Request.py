@@ -3,6 +3,7 @@ import asyncio
 import threading
 import queue
 import json
+import copy
 from configparser import ConfigParser
 
 from ..utils import RuntimeCtx, RuntimeCtxNamespace, PluginManager, AliasManager, to_json_desc, find_json
@@ -51,7 +52,7 @@ class Request(object):
         alias_manager.register("output", self.prompt_output.assign)
         alias_manager.register("set_proxy", lambda proxy_setting: self.plugin_manager.set_settings("proxy", proxy_setting))
         
-    def get_event_generator(self):
+    async def get_event_generator(self):
         # Erase response cache
         self.response_cache = {
             "prompt": {},
@@ -62,23 +63,35 @@ class Request(object):
         model_name = self.plugin_manager.get_settings("model_settings.model_name")
         if not model_name:
             raise Exception(f"[Request] 'model_name' must be set into settings_runtime_ctx 'model_settings'.")
-        model_name = model_name.lower()
         # Load request plugin by model name
-        request_plugin = self.plugin_manager.get("request", model_name)
+        request_plugin_instance = self.plugin_manager.get("request", model_name)(request = self)
+        request_plugin_export = request_plugin_instance.export()
         # Generate request data
-        request_data = request_plugin["generate_request_data"](
-            request_runtime_ctx = self.request_runtime_ctx,
-            get_settings = self.plugin_manager.get_settings,
-        )
+        if asyncio.iscoroutinefunction(request_plugin_export["generate_request_data"]):
+            request_data = await request_plugin_export["generate_request_data"](
+                request_runtime_ctx = self.request_runtime_ctx,
+                get_settings = self.plugin_manager.get_settings,
+            )
+        else:
+            request_data = request_plugin_export["generate_request_data"](
+                request_runtime_ctx = self.request_runtime_ctx,
+                get_settings = self.plugin_manager.get_settings,
+            )
         if self.plugin_manager.get_settings("is_debug") == True:
-            print("[Request Data]\n", json.dumps(request_data["data"], indent=4, ensure_ascii=False))
+            print("[Request Data]\n", json.dumps(request_data, indent=4, ensure_ascii=False))
         # Cache simple prompt
         self.response_cache["prompt"]["input"] = self.prompt_input.get()
         self.response_cache["prompt"]["output"] = self.prompt_output.get()
         # Request and get response generator
-        response_generator = request_plugin["request_model"](request_data)
+        if asyncio.iscoroutinefunction(request_plugin_export["request_model"]):
+            response_generator = await request_plugin_export["request_model"](request_data)
+        else:
+            response_generator = request_plugin_export["request_model"](request_data)
         # Broadcast response
-        broadcast_event_generator = request_plugin["broadcast_response"](response_generator)
+        if asyncio.iscoroutinefunction(request_plugin_export["broadcast_response"]):
+            broadcast_event_generator = await request_plugin_export["broadcast_response"](response_generator)
+        else:
+            broadcast_event_generator = request_plugin_export["broadcast_response"](response_generator)        
         self.response_cache["type"] = self.request_runtime_ctx.get("response:type")
         # Reset request runtime_ctx
         self.request_runtime_ctx.empty()
@@ -86,10 +99,10 @@ class Request(object):
 
     async def get_result_async(self):
         is_debug = self.plugin_manager.get_settings("is_debug")
-        event_generator = self.get_event_generator()
+        event_generator = await self.get_event_generator()
         if is_debug:
             print("[Realtime Response]\n")
-        async for response in event_generator:
+        def handle_response(response):
             if response["event"] == "response:delta" and is_debug:
                 print(response["data"], end="")
             if response["event"] == "response:done":
@@ -97,6 +110,15 @@ class Request(object):
                     print("\n--------------------------\n")
                     print("[Final Response]\n", response["data"], "\n--------------------------\n")
                 self.response_cache["reply"] = response["data"]
+
+        if "__aiter__" in dir(event_generator):
+            async for response in event_generator:
+                handle_response(response)
+        else:
+            print(event_generator)
+            for response in event_generator:
+                handle_response(response)
+            
         if self.response_cache["type"] == "JSON":
             try:
                 self.response_cache["reply"] = json.loads(find_json(self.response_cache["reply"]))

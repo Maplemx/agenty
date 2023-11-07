@@ -1,5 +1,19 @@
 import yaml
 
+def to_prompt_structure(prompt_dict: dict, layer_count: int=1, end: str=""):
+    prompt = ""
+    for key, content in prompt_dict.items():
+        prompt += f"{ '#' * layer_count } { key }:\n"
+        if isinstance(content, dict):
+            prompt += to_prompt_structure(content, layer_count + 1) + '\n'
+        else:
+            prompt += str(content) + '\n'
+        if layer_count == 1:
+            prompt += "\n"
+    if layer_count == 1:
+        prompt += end
+    return prompt
+
 def to_instruction(origin):
     if origin == None:
         return None

@@ -1,6 +1,6 @@
-from .utils import componentABC
+from .utils import ComponentABC
 
-class Skill(componentABC):
+class Skill(ComponentABC):
     def __init__(self, agent):
         pass
 

@@ -1,10 +1,10 @@
 import json
 import asyncio
 
-from .utils import componentABC
+from .utils import ComponentABC
 from Agently.utils import to_json_desc, find_json
 
-class Segment(componentABC):
+class Segment(ComponentABC):
     def __init__(self, agent: object):
         self.agent = agent
         self.is_enabled = lambda: self.agent.plugin_manager.get_settings("component_toggles.Segment")
@@ -33,6 +33,7 @@ class Segment(componentABC):
 
     def toggle(self, is_enabled: bool):
         self.agent.plugin_manager.set_settings("component_toggles.Segment", is_enabled)
+        self.agent.refresh_plugins()
         return self.agent   
 
     def add_segment(self, name: str, output_prompt: any, listener: callable=None, *, is_streaming = False, is_await = False):

@@ -1,7 +1,7 @@
-from .utils import componentABC
+from .utils import ComponentABC
 from Agently.utils import RuntimeCtxNamespace
 
-class Role(componentABC):
+class Role(ComponentABC):
     def __init__(self, agent: object):
         self.agent = agent
         self.role_runtime_ctx = RuntimeCtxNamespace("role", self.agent.agent_runtime_ctx)
@@ -10,6 +10,7 @@ class Role(componentABC):
 
     def toggle(self, is_enabled: bool):
         self.agent.plugin_manager.set_settings("component_toggles.Role", is_enabled)
+        self.agent.refresh_plugins()
         return self.agent
 
     def set_name(self, name: str):

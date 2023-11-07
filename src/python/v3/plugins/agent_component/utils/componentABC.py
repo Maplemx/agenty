@@ -1,9 +1,9 @@
 #ABC = Abstract Base Class
 from abc import ABC, abstractmethod
 
-class componentABC(ABC):
+class ComponentABC(ABC):
     def __init__(self, agent):
-        pass
+        self.agent = agent
 
     @abstractmethod
     def export(self):

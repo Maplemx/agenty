@@ -55,8 +55,14 @@ class NamespaceOps(object):
             self.data_ops.update(f"{ self.namespace_name }.{ keys_with_dots }", value)
         return self.return_to
         
-    def get(self, keys_with_dots: (str, None) = None):
-        return self.data_ops.get(f"{ self.namespace_name }.{ keys_with_dots }" if keys_with_dots else self.namespace_name)
+    def get(self, keys_with_dots: (str, None) = None, default = None):
+        return self.data_ops.get(f"{ self.namespace_name }.{ keys_with_dots }" if keys_with_dots else self.namespace_name, default)
+
+    def remove(self, keys_with_dots: str):
+        return self.data_ops.remove(f"{ self.namespace_name }.{ keys_with_dots }")
+
+    def empty(self):
+        return self.data_ops.remove(self.namespace_name)
 
 class DataOps(object):
     def __init__(self, *, target_data: (dict, None), no_copy: bool=False):
@@ -132,13 +138,13 @@ class DataOps(object):
             self.update(key, value)
         return self
 
-    def get(self, keys_with_dots: (str, None) = None):
+    def get(self, keys_with_dots: (str, None) = None, default: str=None):
         if keys_with_dots:
             keys = keys_with_dots.split('.')
             pointer = self.target_data
             for key in keys:
                 if key not in pointer:
-                    return None
+                    return default
                 else:
                     pointer = pointer[key]
             if self.no_copy:
@@ -150,6 +156,11 @@ class DataOps(object):
                 return self.target_data
             else:
                 return copy.deepcopy(self.target_data)
+
+    def remove(self, keys_with_dots: str):
+        pointer, key = self.__locate_pointer(keys_with_dots)
+        del pointer[key]
+        return self
 
     def empty(self):
         self.target_data = {}

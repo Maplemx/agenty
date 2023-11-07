@@ -1,6 +1,6 @@
-from .utils import componentABC
+from .utils import ComponentABC
 
-class ReplyReformer(componentABC):
+class ReplyReformer(ComponentABC):
     def __init__(self, agent: object):
         self.agent = agent
         self.reform_handler = None

@@ -1,6 +1,6 @@
-from .utils import componentABC
+from .utils import ComponentABC
 
-class Status(componentABC):
+class Status(ComponentABC):
     def __init__(self, agent):
         pass
 

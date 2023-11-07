@@ -84,6 +84,7 @@ class WebSocketKeepAlive(object):
             self.event_handlers[self.client_id].update({ event: [handler] })
         else:
             self.event_handlers[self.client_id][event].append(handler)
+        return self
 
     def stop(self):
         self.stop_signal.set()
@@ -142,21 +143,34 @@ class WebSocketServer(object):
         self.add_handler_queue = queue.Queue()
         self.status = 0
 
-    def start(self):
-        self.server = tornado.web.Application([])
-        self.server.listen(self.port)
-        if not self.add_handler_queue.empty():
-            while True:
-                try:
-                    self.add_handler_queue.get_nowait()()
-                except queue.Empty:
-                    break
-        self.loop = tornado.ioloop.IOLoop.current()
-        self.status = 1
-        self.loop.start()
+    def set_port(self, port: int):
+        self.port = port
+        return self
+
+    def start(self, port: int=None):
+        def start_loop():
+            self.port = port if port else self.port
+            self.server = tornado.web.Application([])
+            self.server.listen(port)
+            if not self.add_handler_queue.empty():
+                while True:
+                    try:
+                        self.add_handler_queue.get_nowait()()
+                    except queue.Empty:
+                        break
+            self.loop = tornado.ioloop.IOLoop.current()
+            self.status = 1
+            self.loop.start()
+
+        self.thread = threading.Thread(target=start_loop)
+        self.thread.start()
+
+        while self.status != 1:
+            time.sleep(0.1)
 
     def stop(self):
         self.loop.stop()
+        self.thread.join()
         self.status = 0
         return self
 
@@ -216,6 +230,7 @@ class WebSocketServer(object):
         else:
             if path in self.event_handlers and event in self.event_handlers[path]:
                 del self.event_handlers[path][event]
+        self.server.remove_handlers(path)
 
     def __exit__(self):
         self.stop()

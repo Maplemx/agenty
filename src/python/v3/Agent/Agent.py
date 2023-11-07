@@ -116,7 +116,7 @@ class Agent(object):
                     raise Exception("[Agent Component] Prefix return data error: only accept None or Tuple('<Request Namespace>', <Update Dict>)")
 
         # Request
-        event_generator = self.request.get_event_generator()
+        event_generator = await self.request.get_event_generator()
     
         # Call Suffix Func to Handle Response Events
         if is_debug:
@@ -128,16 +128,23 @@ class Agent(object):
                 else:
                     suffix_func(response["event"], response["data"])
 
-        async for response in event_generator:
+        async def handle_response(response):
             if response["event"] == "response:delta" and is_debug:
                 print(response["data"], end="")
-            await call_request_suffix(response)
             if response["event"] == "response:done":
                 if self.request.response_cache["reply"] == None:
                     self.request.response_cache["reply"] = response["data"]
                 if is_debug:
                     print("\n--------------------------\n")
                     print("[Final Reply]\n", self.request.response_cache["reply"], "\n--------------------------\n")
+            await call_request_suffix(response)
+
+        if "__aiter__" in dir(event_generator):
+            async for response in event_generator:
+                await handle_response(response)
+        else:
+            for response in event_generator:
+                await handle_response(response)
 
         await call_request_suffix({ "event": "response:finally", "data": self.request.response_cache })
 
@@ -182,14 +189,14 @@ class Agent(object):
         reply = reply_queue.get_nowait()
         return reply
 
-    def start_websocket_server(self):
+    def start_websocket_server(self, port:int=15365):
         is_debug = self.plugin_manager.get_settings("is_debug")
 
         def alias_handler(data: any, response: callable):
             try:
                 if isinstance(data["params"], dict):
                     getattr(self, data["name"])(**data["params"])
-                elif isinstance(data["params"], (list, tuple, set)):
+                elif isinstance(data["params"], (list, tuple, set)): 
                     getattr(self, data["name"])(*data["params"])
                 else:
                     getattr(self, data["name"])(data["params"])
@@ -220,9 +227,12 @@ class Agent(object):
             print(f"[WebSocket Server] Event listeners of agent '{ self.agent_id }' are on.")
 
         if self.global_websocket_server.status == 0:
+            self.global_websocket_server.start(port)
             if is_debug:
                 print(f"[WebSocket Server] WebSocket server started at { self.global_websocket_server.host }:{ self.global_websocket_server.port }.")
-            self.global_websocket_server.start()            
+        else:
+            if is_debug and port != self.global_websocket_server.port:
+                print(f"[WebSocket Server] WebSocket server has already started at { self.global_websocket_server.host }:{ self.global_websocket_server.port }")
 
     def stop_websocket_server(self):
         self.global_websocket_server.remove_event_handler(self.agent_id)

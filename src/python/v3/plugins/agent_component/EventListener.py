@@ -1,6 +1,6 @@
-from .utils import componentABC
+from .utils import ComponentABC
 
-class EventListener(componentABC):
+class EventListener(ComponentABC):
     def __init__(self, agent: object):
         self.agent = agent
         self.listeners = {}

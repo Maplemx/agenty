@@ -1,7 +1,7 @@
 import uuid
-from .utils import componentABC
+from .utils import ComponentABC
 
-class Session(componentABC):
+class Session(ComponentABC):
     def __init__(self, agent):
         self.agent = agent
         self.current_session_id = None

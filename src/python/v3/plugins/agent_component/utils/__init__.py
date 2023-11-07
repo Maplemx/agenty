@@ -1,1 +1,1 @@
-from .componentABC import componentABC
+from .ComponentABC import ComponentABC

@@ -28,11 +28,11 @@ class PluginManager(object):
             self.set_settings(key, settings[key])
         return self
 
-    def get_settings(self, keys_with_dots: str=None):
+    def get_settings(self, keys_with_dots: str=None, default: str=None):
         if keys_with_dots != None:
-            return self.plugins_runtime_ctx.get_trace_back(f"$.settings.{ keys_with_dots }")
+            return self.plugins_runtime_ctx.get_trace_back(f"$.settings.{ keys_with_dots }", default)
         else:
-            return self.plugins_runtime_ctx.get_trace_back("$.settings")
+            return self.plugins_runtime_ctx.get_trace_back("$.settings", default)
 
     def get(self, module_name: str, plugin_name: str=None):
         plugins = self.plugins_runtime_ctx.get_trace_back()
