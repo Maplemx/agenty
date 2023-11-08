@@ -1,6 +1,4 @@
-# Agently 3.0-Alpha版介绍手册
-
-1.0及2.0版本说明手册可参见：[文档合集](https://github.com/Maplemx/Agently/tree/main/doc)
+# Agently 3.0 介绍手册
 
 > 🥷 作者：Maplemx ｜ 📧 Email：maplemx@gmail.com | 💬 微信：moxinapp
 >
@@ -11,14 +9,17 @@
 >  👾 Discord群组邀请链接：[https://discord.gg/j9CvXXJG](https://discord.gg/ufEk56Rk)
 >
 >  👥 微信讨论群：
+>
 > <img width="180" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/5fe467bb-e1c4-4550-9eaa-c59dc3221f58">
 > 
 
+目前版本：`3.0.0-Alpha-8`
 
-
-3.0-Alpha版本安装方法：`pip install Agently==3.0.0a8`
+安装方法：`pip install Agently==3.0.0a8`
 
 Github项目地址：[https://github.com/Maplemx/Agently](https://github.com/Maplemx/Agently)
+
+> ⚠️ Agently v1 和 v2 的代码已经迁移到[Legacy仓库](https://github.com/Maplemx/Agently-Legacy)，本仓库将针对v3版本持续维护更新
 
 <img width="1315" alt="image" src="https://github.com/Maplemx/Agently/assets/4413155/301729ea-8d26-4c40-9689-8e7c12a6ffbd">
 
