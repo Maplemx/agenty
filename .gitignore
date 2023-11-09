@@ -34,3 +34,6 @@ test.js
 private_settings
 myenv
 test
+
+# 忽略PyCharm
+.idea/
