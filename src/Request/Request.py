@@ -97,8 +97,9 @@ class Request(object):
         self.request_runtime_ctx.empty()
         return broadcast_event_generator
 
-    async def get_result_async(self):
+    async def get_result_async(self, request_type: str=None):
         is_debug = self.plugin_manager.get_settings("is_debug")
+        self.request_runtime_ctx.set("request_type", request_type)
         event_generator = await self.get_event_generator()
         if is_debug:
             print("[Realtime Response]\n")
@@ -140,11 +141,11 @@ class Request(object):
                     raise Exception(f"[Agent Request] Error still occured when try to fix JSON decode error: { str(e) }")
         return self.response_cache["reply"]
 
-    def get_result(self):
+    def get_result(self, request_type: str=None):
         reply_queue = queue.Queue()
         def start_in_theard():
             asyncio.set_event_loop(asyncio.new_event_loop())
-            reply = asyncio.get_event_loop().run_until_complete(self.get_result_async())
+            reply = asyncio.get_event_loop().run_until_complete(self.get_result_async(request_type))
             reply_queue.put_nowait(reply)
         theard = threading.Thread(target=start_in_theard)
         theard.start()
