@@ -8,7 +8,7 @@ class PluginManager(object):
 
     def register(self, module_name: str, plugin_name: str, plugin: callable):
         if module_name == "$":
-            raise "[Plugin Manager] Module name can not be '$'."
+            raise Exception("[Plugin Manager] Module name can not be '$'.")
         self.plugins_runtime_ctx.set(f"{ module_name }.{ plugin_name }", plugin)
         return self
 
