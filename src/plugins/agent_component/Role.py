@@ -66,7 +66,9 @@ class Role(ComponentABC):
             return None
         role_data = self.role_runtime_ctx.get()
         if role_data != None:
-            return ("system", role_data)
+            return {
+                "system": role_data,
+            }
         else:
             return None
 
