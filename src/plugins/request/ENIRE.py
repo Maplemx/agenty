@@ -6,7 +6,7 @@ class Ernie(RequestABC):
     def __init__(self, request):
         self.request = request
         self.request_type = self.request.request_runtime_ctx.get("request_type", "chat")
-        if self.request_type == None:
+        if self.request_type is None:
             self.request_type = "chat"
 
     def _create_client(self):
