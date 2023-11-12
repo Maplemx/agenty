@@ -1,3 +1,7 @@
+'''
+This demo can only be run with Agently3.0.0a9
+use `pip install Agently==3.0.0a9` to update your Agently
+'''
 import os
 import Agently
 
@@ -5,14 +9,15 @@ agent_factory = Agently.AgentFactory()
 
 
 agent_factory\
-    .set_settings("model_settings.model_name", "OpenAI")\
-    .set_settings("model_settings.auth", { "api_key": "YOUR-OPENAI-API-KEY" })\
-    .set_settings("model_settings.url", "YOUR-BASE-URL-IF-NEEDED")
+    .set_settings("current_model", "OpenAI")\
+    .set_settings("model.OpenAI.auth.api_key", "YOUR-OPENAI-API-KEY")\
+    .set_settings("model.OpenAI.url", "YOUR-BASE-URL-IF-NEEDED")
 
 '''
 agent_factory\
-    .set_settings("model_settings.model_name", "ERNIE")\
-    .set_settings("model_settings.auth", { "aistudio": "YOUR-BAIDU-AISTUDIO-ACCESS-TOKEN" })
+    .set_settings("current_model", "ERNIE")\
+    .set_settings("model.ERNIE.model_name", "ERNIE")\
+    .set_settings("model.ERNIE.auth", { "aistudio": "YOUR-BAIDU-AISTUDIO-ACCESS-TOKEN" })
 '''
 
 # Step 1: 准备Agent
