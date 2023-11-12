@@ -7,16 +7,18 @@ import copy
 from configparser import ConfigParser
 
 from ..utils import RuntimeCtx, RuntimeCtxNamespace, PluginManager, AliasManager, to_json_desc, find_json
-from .._global import global_plugin_manager
+from .._global import global_plugin_manager, global_settings
 
 class Request(object):
     def __init__(
             self,
             *,
             parent_plugin_manager: object = global_plugin_manager,
-            parent_request_runtime_ctx:object = None
+            parent_request_runtime_ctx: object = None,
+            parent_settings: object = global_settings,
         ):
         self.request_runtime_ctx = RuntimeCtx(parent = parent_request_runtime_ctx)
+        self.settings = RuntimeCtx(parent = parent_settings)
         self.response_cache = {
             "prompt": {},
             "type": None,
@@ -25,34 +27,48 @@ class Request(object):
         # Plugin Manager
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
         # Namespace
-        self.model_settings = RuntimeCtxNamespace("$.settings.model_settings", self.plugin_manager.plugins_runtime_ctx, return_to = self)
-        self.system = RuntimeCtxNamespace("system", self.request_runtime_ctx, return_to = self)
-        self.headline = RuntimeCtxNamespace("headline", self.request_runtime_ctx, return_to = self)
-        self.chat_history = RuntimeCtxNamespace("chat_history", self.request_runtime_ctx, return_to = self)
-        self.prompt_input = RuntimeCtxNamespace("prompt_input", self.request_runtime_ctx, return_to = self)
-        self.prompt_information = RuntimeCtxNamespace("prompt_information", self.request_runtime_ctx, return_to = self)
-        self.prompt_instruction = RuntimeCtxNamespace("prompt_instruction", self.request_runtime_ctx, return_to = self)
-        self.prompt_output = RuntimeCtxNamespace("prompt_output", self.request_runtime_ctx, return_to = self)
+        self.model = RuntimeCtxNamespace("model", self.settings, return_to = self)
+        self.prompt_system = RuntimeCtxNamespace("prompt.system", self.request_runtime_ctx, return_to = self)
+        self.prompt_headline = RuntimeCtxNamespace("prompt.headline", self.request_runtime_ctx, return_to = self)
+        self.prompt_chat_history = RuntimeCtxNamespace("prompt.chat_history", self.request_runtime_ctx, return_to = self)
+        self.prompt_input = RuntimeCtxNamespace("prompt.input", self.request_runtime_ctx, return_to = self)
+        self.prompt_information = RuntimeCtxNamespace("prompt.information", self.request_runtime_ctx, return_to = self)
+        self.prompt_instruction = RuntimeCtxNamespace("prompt.instruction", self.request_runtime_ctx, return_to = self)
+        self.prompt_output = RuntimeCtxNamespace("prompt.output", self.request_runtime_ctx, return_to = self)
+        self.prompt_files = RuntimeCtxNamespace("prompt.files", self.request_runtime_ctx, return_to = self)
         # Alias
         self.alias_manager = AliasManager(self)
         self._register_default_alias(self.alias_manager)
 
+    def set_settings(self, settings_key: str, settings_value: any):
+        self.settings.set(settings_key, settings_value)
+        return self
+
     def _register_default_alias(self, alias_manager):
-        alias_manager.register("set_model", lambda key, value: self.plugin_manager.set_settings(f"model_settings.{ key }", value))
-        alias_manager.register("set_model_name", lambda model_name: self.plugin_manager.set_settings("model_settings.model_name", model_name))
-        alias_manager.register("set_model_auth", lambda model_auth: self.plugin_manager.set_settings("model_settings.auth", model_auth))
-        alias_manager.register("set_model_url", lambda model_url: self.plugin_manager.set_settings("model_settings.url", model_url))
-        alias_manager.register("set_model_options", lambda model_options: self.plugin_manager.set_settings("model_settings.options", model_options))
-        alias_manager.register("set_system", self.system.assign)
-        alias_manager.register("set_headline", self.headline.assign)
-        alias_manager.register("set_chat_history", self.chat_history.assign)
+        def set_model_settings(key: str, value: any, *, model_name:str = None):
+            model_name = model_name if model_name else self.settings.get_trace_back("current_model")
+            if model_name == None:
+                raise Exception("[Model Settings] No model was appointed. Use .use_model(<model name>) or kwarg parameter model_name=<model_name> to set.")
+            self.settings.update(f"model.{ model_name }.{ key }", value)
+
+        alias_manager.register("use_model", lambda model_name: self.settings.set("current_model", model_name))
+        alias_manager.register("set_model", set_model_settings)
+        alias_manager.register("set_model_auth", lambda key, value, *, model_name=None: set_model_settings(f"auth.{ key }", value))
+        alias_manager.register("set_model_url", lambda url, *, model_name=None: set_model_settings("url", url))
+        alias_manager.register("set_model_option", lambda key, value, *, model_name=None: set_model_settings(f"options.{ key }", value))
+        alias_manager.register("set_proxy", lambda proxy: self.settings.set("proxy", proxy))
+        alias_manager.register("system", self.prompt_system.assign)
+        alias_manager.register("headline", self.prompt_headline.assign)
+        alias_manager.register("chat_history", self.prompt_chat_history.assign)
         alias_manager.register("input", self.prompt_input.assign)
         alias_manager.register("info", self.prompt_information.assign)
         alias_manager.register("instruct", self.prompt_instruction.assign)
         alias_manager.register("output", self.prompt_output.assign)
-        alias_manager.register("set_proxy", lambda proxy_setting: self.plugin_manager.set_settings("proxy", proxy_setting))
+        alias_manager.register("files", self.prompt_files.assign)        
         
-    async def get_event_generator(self):
+    async def get_event_generator(self, request_type: str=None):
+        # Set Request Type
+        self.request_runtime_ctx.set("request_type", request_type)
         # Erase response cache
         self.response_cache = {
             "prompt": {},
@@ -60,24 +76,18 @@ class Request(object):
             "reply": None,
         }
         # Confirm model name
-        model_name = self.plugin_manager.get_settings("model_settings.model_name")
+        model_name = self.settings.get_trace_back("current_model")
         if not model_name:
-            raise Exception(f"[Request] 'model_name' must be set into settings_runtime_ctx 'model_settings'.")
+            raise Exception(f"[Request] 'current_model' must be set. Use .use_model(<model_name>) to set.")
         # Load request plugin by model name
         request_plugin_instance = self.plugin_manager.get("request", model_name)(request = self)
         request_plugin_export = request_plugin_instance.export()
         # Generate request data
         if asyncio.iscoroutinefunction(request_plugin_export["generate_request_data"]):
-            request_data = await request_plugin_export["generate_request_data"](
-                request_runtime_ctx = self.request_runtime_ctx,
-                get_settings = self.plugin_manager.get_settings,
-            )
+            request_data = await request_plugin_export["generate_request_data"]()
         else:
-            request_data = request_plugin_export["generate_request_data"](
-                request_runtime_ctx = self.request_runtime_ctx,
-                get_settings = self.plugin_manager.get_settings,
-            )
-        if self.plugin_manager.get_settings("is_debug") == True:
+            request_data = request_plugin_export["generate_request_data"]()
+        if self.settings.get_trace_back("is_debug") == True:
             print("[Request Data]\n", json.dumps(request_data, indent=4, ensure_ascii=False))
         # Cache simple prompt
         self.response_cache["prompt"]["input"] = self.prompt_input.get()
@@ -98,9 +108,8 @@ class Request(object):
         return broadcast_event_generator
 
     async def get_result_async(self, request_type: str=None):
-        is_debug = self.plugin_manager.get_settings("is_debug")
-        self.request_runtime_ctx.set("request_type", request_type)
-        event_generator = await self.get_event_generator()
+        is_debug = self.settings.get_trace_back("is_debug")
+        event_generator = await self.get_event_generator(request_type)
         if is_debug:
             print("[Realtime Response]\n")
         def handle_response(response):
@@ -116,7 +125,6 @@ class Request(object):
             async for response in event_generator:
                 handle_response(response)
         else:
-            print(event_generator)
             for response in event_generator:
                 handle_response(response)
             

@@ -11,7 +11,7 @@ class PluginManager(object):
             raise Exception("[Plugin Manager] Module name can not be '$'.")
         self.plugins_runtime_ctx.set(f"{ module_name }.{ plugin_name }", plugin)
         return self
-
+    
     def set_settings(self, keys_with_dots: str, value: any):
         self.plugins_runtime_ctx.set(f"$.settings.{keys_with_dots  }", value)
         return self

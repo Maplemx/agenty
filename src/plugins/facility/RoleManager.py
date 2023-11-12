@@ -1,7 +1,8 @@
+from .utils import FacilityABC
 from Agently.utils import RuntimeCtx
 
-class RoleManager(object):
-    def __init__(self, *, storage: object, plugin_manager: object):
+class RoleManager(FacilityABC):
+    def __init__(self, *, storage: object, plugin_manager: object, settings: object):
         self.storage = storage.table("role")
         self.plugin_manager = plugin_manager
         self.role_runtime_ctx = RuntimeCtx()

@@ -1,18 +1,25 @@
-from ..utils import PluginManager
-from .._global import global_plugin_manager, global_storage
+from ..utils import PluginManager, RuntimeCtx, RuntimeCtxNamespace
+from .._global import global_plugin_manager, global_storage, global_settings
 
 class FacilityManager(object):
-    def __init__(self, *, storage: object=global_storage, parent_plugin_manager: object=global_plugin_manager):
+    def __init__(self, *, storage: object=global_storage, parent_plugin_manager: object=global_plugin_manager, parent_settings: object = global_settings):
+        # init plugin manager
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
         # use global storage
         self.storage = storage
+        # init facility settings
+        self.settings = RuntimeCtx(parent = global_settings)
         # install facilities
         self.refresh_plugins()
 
     def refresh_plugins(self):
         facilities = self.plugin_manager.get("facility")
         for facility_name, FacilityPluginClass in facilities.items():
-            setattr(self, facility_name, FacilityPluginClass(storage = self.storage, plugin_manager = self.plugin_manager))
+            setattr(self, facility_name, FacilityPluginClass(storage = self.storage, plugin_manager = self.plugin_manager, settings = RuntimeCtxNamespace(facility_name, self.settings)))
+
+    def set_settings(self, settings_key: str, settings_value: any):
+        self.settings.set(settings_key, settings_value)
+        return self
 
     def list(self):
         result = {}

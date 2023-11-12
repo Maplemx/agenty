@@ -6,10 +6,10 @@ class Role(ComponentABC):
         self.agent = agent
         self.role_runtime_ctx = RuntimeCtxNamespace("role", self.agent.agent_runtime_ctx)
         self.role_storage = self.agent.global_storage.table("role")
-        self.is_enabled = lambda: self.agent.plugin_manager.get_settings("component_toggles.Role")
+        self.is_enabled = lambda: self.agent.settings.get_trace_back("component_toggles.Role")
 
     def toggle(self, is_enabled: bool):
-        self.agent.plugin_manager.set_settings("component_toggles.Role", is_enabled)
+        self.agent.settings.set("component_toggles.Role", is_enabled)
         self.agent.refresh_plugins()
         return self.agent
 

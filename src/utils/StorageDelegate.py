@@ -11,17 +11,18 @@ class StorageEditor(DataOps):
         return self.storage.set_all(self.table_name, final_data)
 
 class StorageDelegate(object):
-    def __init__(self, *, db_name: str = "default", plugin_manager: object):
+    def __init__(self, *, db_name: str = "default", plugin_manager: object, settings: object):
         self.db_name = db_name
         self.plugin_manager = plugin_manager
+        self.settings = settings
         return
 
     def set_storage_type(self, storage_type: str):
-        self.plugin_manager.set_settings("storage_type", storage_type)
+        self.settings.set("storage_type", storage_type)
         return self
 
     def __get_storage_plugin(self):
-        storage_type = self.plugin_manager.get_settings("storage_type")
+        storage_type = self.settings.get_trace_back("storage_type")
         return self.plugin_manager.get("storage", storage_type)(db_name = self.db_name)
 
     def set(self, table_name: str, key: str, value: any):

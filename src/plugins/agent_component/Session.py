@@ -9,11 +9,11 @@ class Session(ComponentABC):
         self.recent_chat_history = []
 
     def toggle_auto_save(self, is_enabled: bool):
-        self.agent.plugin_manager.set_settings("component_settings.Session.auto_save", is_enabled)
+        self.agent.settings.set("component_settings.Session.auto_save", is_enabled)
         return self.agent
 
     def set_max_length(self, max_length: int):
-        self.agent.plugin_manager.set_settings("component_settings.Session.max_length", 3000)
+        self.agent.settings.set("component_settings.Session.max_length", 3000)
         return self.agent
 
     def active(self, session_id: str=None):
@@ -30,7 +30,7 @@ class Session(ComponentABC):
         return self.current_session_id
 
     def stop(self):
-        if self.agent.plugin_manager.get_settings("component_settings.Session.auto_save"):
+        if self.agent.settings.get_trace_back("component_settings.Session.auto_save"):
             self.agent.agent_storage.table("chat_history").set(self.current_session_id, self.full_chat_history).save()
         self.current_session_id = None
         self.full_chat_history = []
@@ -38,7 +38,7 @@ class Session(ComponentABC):
         return self.agent
 
     def shorten_chat_history(self):
-        if len(str(self.recent_chat_history)) > self.agent.plugin_manager.get_settings("component_settings.Session.max_length"):
+        if len(str(self.recent_chat_history)) > self.agent.settings.get_trace_back("component_settings.Session.max_length"):
             self.recent_chat_history = self.recent_chat_history[1:]
             self.shorten_chat_history()
         else:

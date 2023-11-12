@@ -7,7 +7,7 @@ from Agently.utils import to_json_desc, find_json
 class Segment(ComponentABC):
     def __init__(self, agent: object):
         self.agent = agent
-        self.is_enabled = lambda: self.agent.plugin_manager.get_settings("component_toggles.Segment")
+        self.is_enabled = lambda: self.agent.settings.get_trace_back("component_toggles.Segment")
         self.segments = {}
         self.response_segments_cache = {}
         self.parse_stage = 0
@@ -32,7 +32,7 @@ class Segment(ComponentABC):
         }
 
     def toggle(self, is_enabled: bool):
-        self.agent.plugin_manager.set_settings("component_toggles.Segment", is_enabled)
+        self.agent.settings.set("component_toggles.Segment", is_enabled)
         self.agent.refresh_plugins()
         return self.agent   
 

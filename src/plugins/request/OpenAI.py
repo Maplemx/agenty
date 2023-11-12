@@ -1,6 +1,7 @@
 import os
 from .utils import RequestABC, to_prompt_structure, to_instruction, to_json_desc, find_json
 from openai import OpenAI as OpenAIClient
+from Agently.utils import RuntimeCtxNamespace
 import httpx
 import time
 
@@ -9,16 +10,18 @@ class OpenAI(RequestABC):
         self.request = request
         self.use_assistant = False
         self.assistant_id = None
+        self.model_name = "OpenAI"
+        self.model_settings = RuntimeCtxNamespace(f"model.{ self.model_name }", self.request.settings)
 
     def _create_client(self):
         client_params = {}
-        base_url = self.request.plugin_manager.get_settings("model_settings.url")
+        base_url = self.model_settings.get_trace_back("url")
         if base_url:
             client_params.update({ "base_url": base_url })
-        proxy = self.request.plugin_manager.get_settings("proxy")
+        proxy = self.request.settings.get_trace_back("proxy")
         if proxy:
             client_params.update({ "http_client": httpx.Client( proxies = proxy ) })
-        api_key = self.request.plugin_manager.get_settings("model_settings.auth.api_key")
+        api_key = self.model_settings.get_trace_back("auth.api_key")
         if api_key:
             client_params.update({ "api_key": api_key })
         else:
@@ -26,29 +29,29 @@ class OpenAI(RequestABC):
         client = OpenAIClient(**client_params)
         return client
 
-    def construct_request_messages(self, request_runtime_ctx):
+    def construct_request_messages(self):
         #init request messages
         request_messages = []
         # - system message
-        system_data = request_runtime_ctx.get("system")
+        system_data = self.request.request_runtime_ctx.get("prompt.system")
         if system_data:
             request_messages.append({ "role": "system", "content": to_instruction(system_data) })
         # - headline
-        headline_data = request_runtime_ctx.get("headline")
+        headline_data = self.request.request_runtime_ctx.get("prompt.headline")
         if headline_data:
             request_messages.append({ "role": "assistant", "content": to_instruction(headline_data) })
         # - chat history
-        chat_history_data = request_runtime_ctx.get("chat_history")
+        chat_history_data = self.request.request_runtime_ctx.get("prompt.chat_history")
         if chat_history_data:
             request_messages.extend(chat_history_data)
         # - request message (prompt)
-        prompt_input_data = request_runtime_ctx.get("prompt_input")
-        prompt_information_data = request_runtime_ctx.get("prompt_information")
-        prompt_instruction_data = request_runtime_ctx.get("prompt_instruction")
-        prompt_output_data = request_runtime_ctx.get("prompt_output")
+        prompt_input_data = self.request.request_runtime_ctx.get("prompt.input")
+        prompt_information_data = self.request.request_runtime_ctx.get("prompt.information")
+        prompt_instruction_data = self.request.request_runtime_ctx.get("prompt.instruction")
+        prompt_output_data = self.request.request_runtime_ctx.get("prompt.output")
         # --- only input
         if not prompt_input_data and not prompt_information_data and not prompt_instruction_data and not prompt_output_data:
-            raise Exception("[Request] Missing 'prompt_input', 'prompt_information', 'prompt_instruction', 'prompt_output' in request runtime_ctx. At least set value to one of them.")
+            raise Exception("[Request] Missing 'prompt.input', 'prompt.information', 'prompt.instruction', 'prompt.output' in request_runtime_ctx. At least set value to one of them.")
         if prompt_input_data and not prompt_information_data and not prompt_instruction_data and not prompt_output_data:
             request_messages.append({ "role": "user", "content": to_instruction(prompt_input_data) })
         # --- construct prompt
@@ -66,43 +69,42 @@ class OpenAI(RequestABC):
                         "TYPE": "JSON can be parsed in Python",
                         "FORMAT": to_json_desc(prompt_output_data),
                     }
-                    request_runtime_ctx.set("response:type", "JSON")
+                    self.request.request_runtime_ctx.set("response:type", "JSON")
                 else:
                     prompt_dict["[OUTPUT REQUIERMENT]"] = str(prompt_output_data)
             request_messages.append({ "role": "user", "content": to_prompt_structure(prompt_dict, end="[OUTPUT]:\n") })
         return request_messages
 
-    def generate_request_data_for_gpt(self, get_settings, request_runtime_ctx):
-        options = get_settings("model_settings.options", {})
+    def generate_request_data_for_gpt(self):
+        options = self.model_settings.get_trace_back("options", {})
         if "model" not in options:
-            options.update({ "model": "gpt-3.5-turbo-1106" })
+            options.update({ "model": "gpt-3.5-turbo" })
         return {
             "stream": True,
-            "messages": self.construct_request_messages(request_runtime_ctx),
+            "messages": self.construct_request_messages(),
             **options
         }
 
-    def generate_request_data_for_assistant(self, get_settings, request_runtime_ctx):
-        options = get_settings("model_settings.options", {})
+    def generate_request_data_for_assistant(self):
+        options = self.model_settings.get_trace_back("options", {})
         if "model" not in options:
-            options.update({ "model": "gpt-3.5-turbo-1106" })
+            options.update({ "model": "gpt-3.5-turbo" })
         return {
             "stream": True,
-            "messages": self.construct_request_messages(request_runtime_ctx),
+            "messages": self.construct_request_messages(),
             "options": options,
         }
 
-    def generate_request_data(self, get_settings, request_runtime_ctx):
-        model_settings = get_settings("model_settings")
-        self.use_assistant = model_settings["use_assistant"] if "use_assistant" in model_settings else False
+    def generate_request_data(self):
+        self.use_assistant = self.model_settings.get_trace_back("use_assistant", False)
         if self.use_assistant:
             if "assistant_id" not in model_settings:
                 raise Exception("[Request] OpenAI require 'assistant_id' when 'use_assistant' is True. Use agent.OpenAIAssistant.update() to create an assistant if you don't have one.")
             else:
                 self.assistant_id = model_settings["assistant_id"]
-            return self.generate_request_data_for_assistant(get_settings, request_runtime_ctx)
+            return self.generate_request_data_for_assistant()
         else:
-            return self.generate_request_data_for_gpt(get_settings, request_runtime_ctx)
+            return self.generate_request_data_for_gpt()
 
     def request_assiatant(self, request_data: dict):
         client = self._create_client()

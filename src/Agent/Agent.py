@@ -17,17 +17,20 @@ class Agent(object):
         global_storage: object,
         global_websocket_server: object,
         parent_plugin_manager: object,
+        parent_settings: object,
     ):
         # Integrate
         self.global_storage = global_storage
         self.global_websocket_server = global_websocket_server
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
+        self.settings = RuntimeCtx(parent = parent_settings)
         self.alias_manager = AliasManager(self)
         self.agent_runtime_ctx = RuntimeCtx(parent = parent_agent_runtime_ctx)
         self.request_runtime_ctx = RuntimeCtx()
         self.request = Request(
             parent_plugin_manager = self.plugin_manager,
             parent_request_runtime_ctx = self.request_runtime_ctx,
+            parent_settings = self.settings,
         )
         # Agent Id
         if agent_id == None:
@@ -38,13 +41,14 @@ class Agent(object):
         self.agent_storage = StorageDelegate(
             db_name = self.agent_id,
             plugin_manager = self.plugin_manager,
+            settings = self.settings,
         )
         # Load Saved agent_runtime_ctx
         self.agent_runtime_ctx.update_by_dict(self.agent_storage.table("agent_runtime_ctx").get())
         # Set Agent Auto Save Setting
         self.agent_runtime_ctx.set("agent_auto_save", auto_save)
         # Version Check In Debug Model
-        if self.plugin_manager.get_settings("is_debug"):
+        if self.settings.get_trace_back("is_debug"):
             check_version_record = self.global_storage.get("agently", "check_version_record")
             today = str(datetime.date.today())
             if check_version_record != today:
@@ -60,7 +64,7 @@ class Agent(object):
     def refresh_plugins(self):
         # Agent Components
         agent_components = self.plugin_manager.get("agent_component")
-        component_toggles = self.plugin_manager.get_settings("component_toggles")
+        component_toggles = self.settings.get_trace_back("component_toggles")
         for agent_component_name, AgentComponentClass in agent_components.items():
             # Skip component_toggles Those Be Toggled Off
             if agent_component_name in component_toggles and component_toggles[agent_component_name] == False:
@@ -98,11 +102,11 @@ class Agent(object):
         return self
 
     def set_settings(self, settings_key: str, settings_value: any):
-        self.plugin_manager.set_settings(settings_key, settings_value)
+        self.settings.set(settings_key, settings_value)
         return self
 
-    async def start_async(self):
-        is_debug = self.plugin_manager.get_settings("is_debug")
+    async def start_async(self, request_type: str=None):
+        is_debug = self.settings.get_trace_back("is_debug")
         # Auto Save Agent runtime_ctx
         if self.agent_runtime_ctx.get("agent_auto_save") ==  True:
             self.save()
@@ -119,7 +123,7 @@ class Agent(object):
                     raise Exception("[Agent Component] Prefix return data error: only accept None or Dict({'<request slot name>': <data append to slot>, ... } or Tuple('request slot name', <data append to slot>)")
 
         # Request
-        event_generator = await self.request.get_event_generator()
+        event_generator = await self.request.get_event_generator(request_type)
     
         # Call Suffix Func to Handle Response Events
         if is_debug:
@@ -180,11 +184,11 @@ class Agent(object):
         self.request_runtime_ctx.empty()
         return self.request.response_cache["reply"]
 
-    def start(self):
+    def start(self, request_type: str=None):
         reply_queue = queue.Queue()
         def start_in_theard():
             asyncio.set_event_loop(asyncio.new_event_loop())
-            reply = asyncio.get_event_loop().run_until_complete(self.start_async())
+            reply = asyncio.get_event_loop().run_until_complete(self.start_async(request_type))
             reply_queue.put_nowait(reply)
         theard = threading.Thread(target=start_in_theard)
         theard.start()
@@ -193,7 +197,7 @@ class Agent(object):
         return reply
 
     def start_websocket_server(self, port:int=15365):
-        is_debug = self.plugin_manager.get_settings("is_debug")
+        is_debug = self.settings.get_trace_back("is_debug")
 
         def alias_handler(data: any, response: callable):
             try:
@@ -239,5 +243,5 @@ class Agent(object):
 
     def stop_websocket_server(self):
         self.global_websocket_server.remove_event_handler(self.agent_id)
-        if self.plugin_manager.get_settings("is_debug"):
+        if self.settings.get_trace_back("is_debug"):
             print(f"[WebSocket Server] Agent '{ self.agent_id } websocket server stoped.'")
