@@ -4,45 +4,51 @@ from Agently.utils import RuntimeCtxNamespace
 class Role(ComponentABC):
     def __init__(self, agent: object):
         self.agent = agent
+        self.user_info_runtime_ctx = RuntimeCtxNamespace("user_info", self.agent.agent_runtime_ctx)
         self.role_runtime_ctx = RuntimeCtxNamespace("role", self.agent.agent_runtime_ctx)
         self.role_storage = self.agent.global_storage.table("role")
-        self.is_enabled = lambda: self.agent.settings.get_trace_back("component_toggles.Role")
 
-    def toggle(self, is_enabled: bool):
-        self.agent.settings.set("component_toggles.Role", is_enabled)
-        self.agent.refresh_plugins()
+    def __get_runtime_ctx(self, target: str):
+        if target == "role":
+            return self.role_runtime_ctx
+        elif target == "user_info":
+            return self.user_info_runtime_ctx
+
+    def set_name(self, name: str, *, target: str):
+        runtime_ctx = self.__get_runtime_ctx(target)
+        runtime_ctx.set("NAME", name)
         return self.agent
 
-    def set_name(self, name: str):
-        self.role_runtime_ctx.set("NAME", name)
-        return self.agent
-
-    def set(self, key: any, value: any=None):
+    def set(self, key: any, value: any=None, *, target: str):
+        runtime_ctx = self.__get_runtime_ctx(target)
         if value is not None:
-            self.role_runtime_ctx.set(key, value)
+            runtime_ctx.set(key, value)
         else:
-            self.role_runtime_ctx.set("ROLE", key)
+            runtime_ctx.set("ROLE", key)
         return self.agent
 
-    def update(self, key: any, value: any=None):
+    def update(self, key: any, value: any=None, *, target: str):
+        runtime_ctx = self.__get_runtime_ctx(target)
         if value is not None:
-            self.role_runtime_ctx.update(key, value)
+            runtime_ctx.update(key, value)
         else:
-            self.role_runtime_ctx.update("ROLE", key)
+            runtime_ctx.update("ROLE", key)
         return self.agent        
 
-    def append(self, key: any, value: any=None):
+    def append(self, key: any, value: any=None, *, target: str):
+        runtime_ctx = self.__get_runtime_ctx(target)
         if value is not None:
-            self.role_runtime_ctx.append(key, value)
+            runtime_ctx.append(key, value)
         else:
-            self.role_runtime_ctx.append("ROLE", key)
+            runtime_ctx.append("ROLE", key)
         return self.agent
 
-    def extend(self, key: any, value: any=None):
+    def extend(self, key: any, value: any=None, *, target: str):
+        runtime_ctx = self.__get_runtime_ctx(target)
         if value is not None:
-            self.role_runtime_ctx.extend(key, value)
+            runtime_ctx.extend(key, value)
         else:
-            self.role_runtime_ctx.extend("ROLE", key)
+            runtime_ctx.extend("ROLE", key)
         return self.agent
 
     def save(self, role_name: str=None):
@@ -62,12 +68,11 @@ class Role(ComponentABC):
         return self.agent
 
     def _prefix(self):
-        if not self.is_enabled():
-            return None
-        role_data = self.role_runtime_ctx.get()
-        if role_data != None:
+        component_toggle = self.agent.settings.get_trace_back("component_toggles.Role")
+        if component_toggle:
             return {
-                "system": role_data,
+                "role": self.role_runtime_ctx.get(),
+                "user_info": self.user_info_runtime_ctx.get(),
             }
         else:
             return None
@@ -77,12 +82,16 @@ class Role(ComponentABC):
             "prefix": self._prefix,
             "suffix": None,
             "alias": {
-                "toggle_role": { "func": self.toggle },
-                "set_role_name": { "func": self.set_name },
-                "set_role": { "func": self.set },
-                "update_role": { "func": self.update },
-                "append_role": { "func": self.append },
-                "extend_role": { "func": self.extend },
+                "set_role_name": { "func": lambda name: self.set_name(name, target="role") },
+                "set_role": { "func": lambda key, value=None: self.set(key, value, target="role") },
+                "update_role": { "func": lambda key, value=None: self.update(key, value, target="role") },
+                "append_role": { "func": lambda key, value=None: self.append(key, value, target="role") },
+                "extend_role": { "func": lambda key, value=None: self.extend(key, value, target="role") },
+                "set_user_name": { "func": lambda name: self.set_name(name, target="user_info") },
+                "set_user_info": { "func": lambda key, value=None: self.set(key, value, target="user_info") },
+                "update_user_info": { "func": lambda key, value=None: self.update(key, value, target="user_info") },
+                "append_user_info": { "func": lambda key, value=None: self.append(key, value, target="user_info") },
+                "extend_user_info": { "func": lambda key, value=None: self.extend(key, value, target="user_info") },
                 "save_role": { "func": self.save },
                 "load_role": { "func": self.load },
             },
