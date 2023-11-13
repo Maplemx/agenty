@@ -64,13 +64,13 @@ class OpenAIAssistant(ComponentABC):
 
     def _create_client(self):
         client_params = {}
-        base_url = self.agent.request.settings.get_trace_back("model_settings.url")
+        base_url = self.agent.request.settings.get_trace_back("model.OpenAI.url")
         if base_url:
             client_params.update({ "base_url": base_url })
         proxy = self.agent.request.settings.get_trace_back("proxy")
         if proxy:
             client_params.update({ "http_client": httpx.Client( proxies = proxy ) })
-        api_key = self.agent.request.settings.get_trace_back("model_settings.auth.api_key")
+        api_key = self.agent.request.settings.get_trace_back("model.OpenAI.auth.api_key")
         if api_key:
             client_params.update({ "api_key": api_key })
         else:
@@ -97,12 +97,12 @@ class OpenAIAssistant(ComponentABC):
         name = self.assistant_runtime_ctx.get("name", "My Assistant")
         instruction = self.assistant_runtime_ctx.get("instruction", "You are a helpful assistant.")
         model = self.agent.request.settings.get_trace_back(
-            "model_settings.options.model",
+            "model.OpenAI.options.model",
             "gpt-3.5-turbo-1106",
         )
         tools = self.assistant_runtime_ctx.get("tools", [])
         
-        assistant_id = self.agent.request.settings.get_trace_back("model_settings.assistant_id")
+        assistant_id = self.agent.request.settings.get_trace_back("model.OpenAI.assistant_id")
         # update
         if assistant_id and not force_to_create:
             assistant = client.beta.assistants.update(

@@ -1,4 +1,3 @@
-import os
 from .utils import RequestABC, to_prompt_structure, to_instruction, to_json_desc, find_json
 from openai import OpenAI as OpenAIClient
 from Agently.utils import RuntimeCtxNamespace
@@ -98,10 +97,11 @@ class OpenAI(RequestABC):
     def generate_request_data(self):
         self.use_assistant = self.model_settings.get_trace_back("use_assistant", False)
         if self.use_assistant:
-            if "assistant_id" not in model_settings:
+            assistant_id = self.model_settings.get_trace_back("assistant_id")
+            if not assistant_id:
                 raise Exception("[Request] OpenAI require 'assistant_id' when 'use_assistant' is True. Use agent.OpenAIAssistant.update() to create an assistant if you don't have one.")
             else:
-                self.assistant_id = model_settings["assistant_id"]
+                self.assistant_id = assistant_id
             return self.generate_request_data_for_assistant()
         else:
             return self.generate_request_data_for_gpt()
