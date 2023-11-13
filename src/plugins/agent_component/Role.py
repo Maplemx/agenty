@@ -24,7 +24,7 @@ class Role(ComponentABC):
         if value is not None:
             runtime_ctx.set(key, value)
         else:
-            runtime_ctx.set("ROLE", key)
+            runtime_ctx.set("DESC", key)
         return self.agent
 
     def update(self, key: any, value: any=None, *, target: str):
@@ -32,7 +32,7 @@ class Role(ComponentABC):
         if value is not None:
             runtime_ctx.update(key, value)
         else:
-            runtime_ctx.update("ROLE", key)
+            runtime_ctx.update("DESC", key)
         return self.agent        
 
     def append(self, key: any, value: any=None, *, target: str):
@@ -40,7 +40,7 @@ class Role(ComponentABC):
         if value is not None:
             runtime_ctx.append(key, value)
         else:
-            runtime_ctx.append("ROLE", key)
+            runtime_ctx.append("DESC", key)
         return self.agent
 
     def extend(self, key: any, value: any=None, *, target: str):
@@ -48,7 +48,7 @@ class Role(ComponentABC):
         if value is not None:
             runtime_ctx.extend(key, value)
         else:
-            runtime_ctx.extend("ROLE", key)
+            runtime_ctx.extend("DESC", key)
         return self.agent
 
     def save(self, role_name: str=None):
@@ -64,7 +64,8 @@ class Role(ComponentABC):
 
     def load(self, role_name: str):
         role_data = self.role_storage.get(role_name)
-        self.role_runtime_ctx.update(role_data)
+        for key, value in role_data.items():
+            self.role_runtime_ctx.update(key, value)
         return self.agent
 
     def _prefix(self):

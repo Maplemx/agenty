@@ -15,28 +15,28 @@ class RoleManager(FacilityABC):
         if value is not None:
             self.role_runtime_ctx.set(key, value)
         else:
-            self.role_runtime_ctx.set("ROLE", key)
+            self.role_runtime_ctx.set("DESC", key)
         return self
 
     def update(self, key: any, value: any=None):
         if value is not None:
             self.role_runtime_ctx.update(key, value)
         else:
-            self.role_runtime_ctx.update("ROLE", key)
+            self.role_runtime_ctx.update("DESC", key)
         return self     
 
     def append(self, key: any, value: any=None):
         if value is not None:
             self.role_runtime_ctx.append(key, value)
         else:
-            self.role_runtime_ctx.append("ROLE", key)
+            self.role_runtime_ctx.append("DESC", key)
         return self
 
     def extend(self, key: any, value: any=None):
         if value is not None:
             self.role_runtime_ctx.extend(key, value)
         else:
-            self.role_runtime_ctx.extend("ROLE", key)
+            self.role_runtime_ctx.extend("DESC", key)
         return self
 
     def save(self, role_name: str=None):
