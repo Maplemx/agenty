@@ -71,7 +71,6 @@ class Request(object):
         alias_manager.register("files", self.prompt_files.assign)        
         
     async def get_event_generator(self, request_type: str=None):
-        print(self.request_runtime_ctx.get_trace_back())
         # Set Request Type
         self.request_runtime_ctx.set("request_type", request_type)
         # Erase response cache
