@@ -118,7 +118,8 @@ class Agent(object):
                     self.request.request_runtime_ctx.update(prefix_data[0], prefix_data[1])
                 elif isinstance(prefix_data, dict):
                     for key, value in prefix_data.items():
-                        self.request.request_runtime_ctx.append(key, value)
+                        if value != None:
+                            self.request.request_runtime_ctx.append(f"prompt.{ key }", value)
                 else:
                     raise Exception("[Agent Component] Prefix return data error: only accept None or Dict({'<request slot name>': <data append to slot>, ... } or Tuple('request slot name', <data append to slot>)")
 
