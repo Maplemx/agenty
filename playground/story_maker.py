@@ -11,8 +11,8 @@ agent_factory = Agently.AgentFactory()
 agent_factory\
     .set_settings("current_model", "OpenAI")\
     .set_settings("model.OpenAI.auth.api_key", "YOUR-OPENAI-API-KEY")\
-    .set_settings("model.OpenAI.url", "YOUR-BASE-URL-IF-NEEDED")
-
+    .set_settings("model.OpenAI.url", "YOUR-BASE-URL-IF-NEEDED")\
+    .set_settings("proxy", "http://127.0.0.1:7890")
 '''
 agent_factory\
     .set_settings("current_model", "ERNIE")\
