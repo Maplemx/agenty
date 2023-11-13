@@ -34,6 +34,13 @@ class NamespaceOps(object):
             self.data_ops.set(f"{ self.namespace_name }.{ keys_with_dots }", value)
         return self.return_to
 
+    def delta(self, keys_with_dots: str, value: any):
+        if isinstance(value, dict):
+            for k, v in value.items():
+                self.delta(f"{ keys_with_dots }.{ k }", v)
+        else:
+            self.append(keys_with_dots, value)
+
     def append(self, keys_with_dots: any, value: any=None):
         if not value:
             self.data_ops.append(self.namespace_name, keys_with_dots)
@@ -87,6 +94,13 @@ class DataOps(object):
         pointer, key = self.__locate_pointer(keys_with_dots)
         pointer[key] = value
         return self
+
+    def delta(self, keys_with_dots: str, value: any):
+        if isinstance(value, dict):
+            for k, v in value.items():
+                self.delta(f"{ keys_with_dots }.{ k }", v)
+        else:
+            self.append(keys_with_dots, value)
 
     def append(self, keys_with_dots: str, value: any):
         pointer, key = self.__locate_pointer(keys_with_dots)
