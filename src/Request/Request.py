@@ -28,8 +28,10 @@ class Request(object):
         self.plugin_manager = PluginManager(parent = parent_plugin_manager)
         # Namespace
         self.model = RuntimeCtxNamespace("model", self.settings, return_to = self)
-        self.prompt_system = RuntimeCtxNamespace("prompt.system", self.request_runtime_ctx, return_to = self)
-        self.prompt_headline = RuntimeCtxNamespace("prompt.headline", self.request_runtime_ctx, return_to = self)
+        self.prompt_general = RuntimeCtxNamespace("prompt.general", self.request_runtime_ctx, return_to = self)
+        self.prompt_role = RuntimeCtxNamespace("prompt.role", self.request_runtime_ctx, return_to = self)
+        self.prompt_user_info = RuntimeCtxNamespace("prompt.user_info", self.request_runtime_ctx, return_to = self)
+        self.prompt_abstract = RuntimeCtxNamespace("prompt.abstract", self.request_runtime_ctx, return_to = self)
         self.prompt_chat_history = RuntimeCtxNamespace("prompt.chat_history", self.request_runtime_ctx, return_to = self)
         self.prompt_input = RuntimeCtxNamespace("prompt.input", self.request_runtime_ctx, return_to = self)
         self.prompt_information = RuntimeCtxNamespace("prompt.information", self.request_runtime_ctx, return_to = self)
@@ -57,8 +59,10 @@ class Request(object):
         alias_manager.register("set_model_url", lambda url, *, model_name=None: set_model_settings("url", url))
         alias_manager.register("set_model_option", lambda key, value, *, model_name=None: set_model_settings(f"options.{ key }", value))
         alias_manager.register("set_proxy", lambda proxy: self.settings.set("proxy", proxy))
-        alias_manager.register("system", self.prompt_system.assign)
-        alias_manager.register("headline", self.prompt_headline.assign)
+        alias_manager.register("general", self.prompt_general.assign)
+        alias_manager.register("role", self.prompt_role.assign)
+        alias_manager.register("user_info", self.prompt_user_info.assign)
+        alias_manager.register("abstract", self.prompt_abstract.assign)
         alias_manager.register("chat_history", self.prompt_chat_history.assign)
         alias_manager.register("input", self.prompt_input.assign)
         alias_manager.register("info", self.prompt_information.assign)
@@ -67,6 +71,7 @@ class Request(object):
         alias_manager.register("files", self.prompt_files.assign)        
         
     async def get_event_generator(self, request_type: str=None):
+        print(self.request_runtime_ctx.get_trace_back())
         # Set Request Type
         self.request_runtime_ctx.set("request_type", request_type)
         # Erase response cache

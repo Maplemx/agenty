@@ -24,15 +24,26 @@ class Ernie(RequestABC):
     def construct_request_messages(self):
         #init request messages
         request_messages = []
-        # - system message
-        system_data = self.request.request_runtime_ctx.get("prompt.system")
-        if system_data:
-            request_messages.append({ "role": "user", "content": to_instruction(system_data) })
+        # - general instruction
+        general_instruction_data = self.request.request_runtime_ctx.get("prompt.general_instruction")
+        if general_instruction_data:
+            request_messages.append({ "role": "user", "content": f"[重要指导说明]\n{ to_instruction(general_instruction_data) }" })
+            request_messages.append({ "role": "assistant", "content": "OK" })
+        # - role
+        role_data = self.request.request_runtime_ctx.get("prompt.role")
+        if role_data:
+            request_messages.append({ "role": "user", "content": f"[角色及行为设定]\n{ to_instruction(role_data) }" })
+            request_messages.append({ "role": "assistant", "content": "OK" })
+        # - user info
+        user_info_data = self.request.request_runtime_ctx.get("prompt.user_info")
+        if user_info_data:
+            request_messages.append({ "role": "user", "content": f"[用户信息]\n{ to_instruction(user_info_data) }" })
             request_messages.append({ "role": "assistant", "content": "OK" })
         # - headline
         headline_data = self.request.request_runtime_ctx.get("prompt.headline")
         if headline_data:
-            request_messages.append({ "role": "assistant", "content": to_instruction(headline_data) })
+            request_messages.append({ "role": "user", "content": f"[主题及摘要]{to_instruction(headline_data)}" })
+            request_messages.append({ "role": "assistant", "content": "OK" })
         # - chat history
         chat_history_data = self.request.request_runtime_ctx.get("prompt.chat_history")
         if chat_history_data:
@@ -51,21 +62,21 @@ class Ernie(RequestABC):
         else:
             prompt_dict = {}
             if prompt_input_data:
-                prompt_dict["[INPUT]"] = to_instruction(prompt_input_data)
+                prompt_dict["[输入]"] = to_instruction(prompt_input_data)
             if prompt_information_data:
-                prompt_dict["[HELPFUL INFORMATION]"] = to_instruction(prompt_information_data)
+                prompt_dict["[补充信息]"] = to_instruction(prompt_information_data)
             if prompt_instruction_data:
-                prompt_dict["[INSTRUCTION]"] = to_instruction(prompt_instruction_data)
+                prompt_dict["[处理规则]"] = to_instruction(prompt_instruction_data)
             if prompt_output_data:
                 if isinstance(prompt_output_data, (dict, list, set)):
-                    prompt_dict["[OUTPUT REQUIREMENT]"] = {
+                    prompt_dict["[输出要求]"] = {
                         "TYPE": "JSON can be parsed in Python",
                         "FORMAT": to_json_desc(prompt_output_data),
                     }
                     self.request.request_runtime_ctx.set("response:type", "JSON")
                 else:
-                    prompt_dict["[OUTPUT REQUIERMENT]"] = str(prompt_output_data)
-            request_messages.append({ "role": "user", "content": to_prompt_structure(prompt_dict, end="[OUTPUT]:\n") })
+                    prompt_dict["[输出要求]"] = str(prompt_output_data)
+            request_messages.append({ "role": "user", "content": to_prompt_structure(prompt_dict, end="[输出]:\n") })
         return request_messages
 
     def generate_request_data(self):

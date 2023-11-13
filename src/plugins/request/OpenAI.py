@@ -31,23 +31,31 @@ class OpenAI(RequestABC):
     def construct_request_messages(self):
         #init request messages
         request_messages = []
-        # - system message
-        system_data = self.request.request_runtime_ctx.get("prompt.system")
-        if system_data:
-            request_messages.append({ "role": "system", "content": to_instruction(system_data) })
+        # - general instruction
+        general_instruction_data = self.request.request_runtime_ctx.get_trace_back("prompt.general_instruction")
+        if general_instruction_data:
+            request_messages.append({ "role": "system", "content": f"[GENERAL INSTRUCTION]\n{ to_instruction(general_instruction_data) }" })
+        # - role
+        role_data = self.request.request_runtime_ctx.get_trace_back("prompt.role")
+        if role_data:
+            request_messages.append({ "role": "system", "content": f"[ROLE SETTINGS]\n{ to_instruction(role_data) }" })
+        # - user info
+        user_info_data = self.request.request_runtime_ctx.get_trace_back("prompt.user_info")
+        if user_info_data:
+            request_messages.append({ "role": "system", "content": f"[ABOUT USER]\n{ to_instruction(user_info_data) }" })
         # - headline
-        headline_data = self.request.request_runtime_ctx.get("prompt.headline")
+        headline_data = self.request.request_runtime_ctx.get_trace_back("prompt.headline")
         if headline_data:
             request_messages.append({ "role": "assistant", "content": to_instruction(headline_data) })
         # - chat history
-        chat_history_data = self.request.request_runtime_ctx.get("prompt.chat_history")
+        chat_history_data = self.request.request_runtime_ctx.get_trace_back("prompt.chat_history")
         if chat_history_data:
             request_messages.extend(chat_history_data)
         # - request message (prompt)
-        prompt_input_data = self.request.request_runtime_ctx.get("prompt.input")
-        prompt_information_data = self.request.request_runtime_ctx.get("prompt.information")
-        prompt_instruction_data = self.request.request_runtime_ctx.get("prompt.instruction")
-        prompt_output_data = self.request.request_runtime_ctx.get("prompt.output")
+        prompt_input_data = self.request.request_runtime_ctx.get_trace_back("prompt.input")
+        prompt_information_data = self.request.request_runtime_ctx.get_trace_back("prompt.information")
+        prompt_instruction_data = self.request.request_runtime_ctx.get_trace_back("prompt.instruction")
+        prompt_output_data = self.request.request_runtime_ctx.get_trace_back("prompt.output")
         # --- only input
         if not prompt_input_data and not prompt_information_data and not prompt_instruction_data and not prompt_output_data:
             raise Exception("[Request] Missing 'prompt.input', 'prompt.information', 'prompt.instruction', 'prompt.output' in request_runtime_ctx. At least set value to one of them.")
