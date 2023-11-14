@@ -1,7 +1,7 @@
 # Network
 aiohttp
 websockets
-torando
+tornado
 # Model Client
 openai
 httpx
