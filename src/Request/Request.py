@@ -68,7 +68,8 @@ class Request(object):
         alias_manager.register("info", self.prompt_information.assign)
         alias_manager.register("instruct", self.prompt_instruction.assign)
         alias_manager.register("output", self.prompt_output.assign)
-        alias_manager.register("files", self.prompt_files.append)        
+        alias_manager.register("file", self.prompt_files.append)
+        alias_manager.register("files", self.prompt_files.extend)        
         
     async def get_event_generator(self, request_type: str=None):
         # Set Request Type
