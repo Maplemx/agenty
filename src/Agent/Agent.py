@@ -165,7 +165,7 @@ class Agent(object):
                     print("\n--------------------------\n")
             except json.JSONDecodeError as e:
                 try:
-                    fixed_result = await self.request\
+                    fixed_result = self.request\
                         .input({
                             "target": self.request.response_cache["prompt"]["input"],
                             "format": to_json_desc(self.request.response_cache["prompt"]["output"]),
@@ -174,7 +174,7 @@ class Agent(object):
                             "position": e.pos,
                         })\
                         .output('Fixed JSON String can be parsed by Python only without explanation and decoration.')\
-                        .get_result_async()
+                        .start()
                     self.request.response_cache["reply"] = json.loads(find_json(fixed_result))
                     if is_debug:
                         print("[Parse JSON to Dict] Done")

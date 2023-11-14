@@ -68,7 +68,7 @@ class Request(object):
         alias_manager.register("info", self.prompt_information.assign)
         alias_manager.register("instruct", self.prompt_instruction.assign)
         alias_manager.register("output", self.prompt_output.assign)
-        alias_manager.register("files", self.prompt_files.assign)        
+        alias_manager.register("files", self.prompt_files.append)        
         
     async def get_event_generator(self, request_type: str=None):
         # Set Request Type
@@ -137,7 +137,7 @@ class Request(object):
                 self.response_cache["reply"] = json.loads(find_json(self.response_cache["reply"]))
             except json.JSONDecodeError as e:
                 try:
-                    fixed_result = await self.start\
+                    fixed_result = self.start\
                         .input({
                             "target": self.response_cache["prompt"]["input"],
                             "format": to_json_desc(self.response_cache["prompt"]["output"]),
@@ -146,7 +146,7 @@ class Request(object):
                             "position": e.pos,
                         })\
                         .output('Fixed JSON String can be parsed by Python only without explanation and decoration.')\
-                        .get_result_async()
+                        .start()
                     fixed_result = json.loads(find_json(fixed_result))
                     return fixed_result
                 except Exception as e:
@@ -165,5 +165,5 @@ class Request(object):
         reply = reply_queue.get_nowait()
         return reply
 
-    def start(self):
-        return self.get_result()
+    def start(self, request_type: str=None):
+        return self.get_result(request_type)
