@@ -53,7 +53,8 @@ class Agent(object):
             today = str(datetime.date.today())
             if check_version_record != today:
                 check_version(self.global_storage, today)
-        # Agent Request Prefix & Suffix
+        # Agent Request Early, Prefix & Suffix
+        self.agent_request_early = []
         self.agent_request_prefix = []
         self.agent_request_suffix = []
         # Register Default Request Alias to Agent
@@ -73,19 +74,24 @@ class Agent(object):
             agent_component_instance = AgentComponentClass(agent = self)
             setattr(self, agent_component_name, agent_component_instance)
             component_export = agent_component_instance.export()
-            # Register export_prefix, export_suffix
-            if component_export["prefix"]:
+            # Register export_early, export_prefix, export_suffix
+            if "early" in component_export:
+                if isinstance(component_export["early"], list):
+                    self.agent_request_early.extend(component_export["early"])
+                elif callable(component_export["early"]):
+                    self.agent_request_early.append(component_export["early"])
+            if "prefix" in component_export:
                 if isinstance(component_export["prefix"], list):
                     self.agent_request_prefix.extend(component_export["prefix"])
                 elif callable(component_export["prefix"]):
                     self.agent_request_prefix.append(component_export["prefix"])
-            if component_export["suffix"]:
+            if "suffix" in component_export:
                 if isinstance(component_export["suffix"], list):
                     self.agent_request_suffix.extend(component_export["suffix"])
                 elif callable(component_export["suffix"]):
                     self.agent_request_suffix.append(component_export["suffix"])
             # Register Alias
-            if component_export["alias"]:
+            if "alias" in component_export:
                 for alias_name, alias_info in component_export["alias"].items():
                     self.alias_manager.register(
                         alias_name,
@@ -110,6 +116,18 @@ class Agent(object):
         # Auto Save Agent runtime_ctx
         if self.agent_runtime_ctx.get("agent_auto_save") ==  True:
             self.save()
+        # Call Early Func before Prefix Stage (in case of sometimes need to call other alias)
+        for early_func in self.agent_request_early:
+            early_data = await early_func() if asyncio.iscoroutinefunction(early_func) else early_func()
+            if early_data != None:
+                if isinstance(early_data, tuple) and isinstance(early_data[0], str) and early_data[1] != None:
+                    self.request.request_runtime_ctx.update(early_data[0], early_data[1])
+                elif isinstance(early_data, dict):
+                    for key, value in early_data.items():
+                        if value != None:
+                            self.request.request_runtime_ctx.delta(f"prompt.{ key }", value)
+                else:
+                    raise Exception("[Agent Component] Early stage return data error: only accept None or Dict({'<request slot name>': <data append to slot>, ... } or Tuple('request slot name', <data append to slot>)")
         # Call Prefix Funcs to Prepare Prefix Data(From agent_runtime_ctx To request_runtime_ctx)
         for prefix_func in self.agent_request_prefix:
             prefix_data = await prefix_func() if asyncio.iscoroutinefunction(prefix_func) else prefix_func()
