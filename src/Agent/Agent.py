@@ -5,7 +5,7 @@ import threading
 import queue
 from ..Request import Request
 from ..WebSocket import WebSocketServer
-from ..utils import RuntimeCtx, StorageDelegate, PluginManager, AliasManager, IdGenerator, to_json_desc, find_json, check_version
+from ..utils import RuntimeCtx, StorageDelegate, PluginManager, AliasManager, IdGenerator, to_json_desc, find_json, check_version, load_json
 
 class Agent(object):
     def __init__(
@@ -176,6 +176,14 @@ class Agent(object):
 
         # Fix JSON if Required
         if self.request.response_cache["type"] == "JSON":
+            self.request.response_cache["reply"] = load_json(
+                self.request.response_cache["reply"],
+                self.request.response_cache["prompt"]["input"],
+                self.request.response_cache["prompt"]["output"],
+                self.request,
+                is_debug = is_debug,
+            )
+            '''
             try:
                 self.request.response_cache["reply"] = json.loads(find_json(self.request.response_cache["reply"]))
                 if is_debug:
@@ -199,6 +207,7 @@ class Agent(object):
                         print("\n--------------------------\n")
                 except Exception as e:
                     raise Exception(f"[Agent Request] Error still occured when try to fix JSON decode error: { str(e) }")
+            '''
 
         self.request_runtime_ctx.empty()
         return self.request.response_cache["reply"]
