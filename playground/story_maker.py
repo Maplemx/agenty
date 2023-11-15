@@ -1,6 +1,6 @@
 '''
-This demo can only be run with Agently3.0.0a9
-use `pip install Agently==3.0.0a9` to update your Agently
+This demo can only be run with Agently3.0.0a9 or above
+use `pip install Agently==3.0.1` to update your Agently
 '''
 import os
 import Agently
