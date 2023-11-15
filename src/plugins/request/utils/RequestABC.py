@@ -1,4 +1,6 @@
 #ABC = Abstract Base Class
+from Agently.utils import to_instruction, to_json_desc
+from .transform import to_prompt_structure
 from abc import ABC, abstractmethod
 
 class RequestABC(ABC):
@@ -74,7 +76,7 @@ class RequestABC(ABC):
             #Your request data dict
             #"stream": True,
             #"messages": [...],
-        } 
+        }
 
     def request_model(self, request_data: dict):
         return
@@ -90,7 +92,7 @@ class RequestABC(ABC):
         - { "event": "response:done_origin", "data": any } (optional)
         If your response is not streaming, you can only yield response:done.
         '''
-        return 
+        return
 
     @abstractmethod
     def export(self):
