@@ -121,11 +121,13 @@ class Agent(object):
             early_data = await early_func() if asyncio.iscoroutinefunction(early_func) else early_func()
             if early_data != None:
                 if isinstance(early_data, tuple) and isinstance(early_data[0], str) and early_data[1] != None:
-                    self.request.request_runtime_ctx.update(early_data[0], early_data[1])
+                    key = early_data[0] if early_data[0].startswith("prompt.") else f"prompt.{ early_data[0] }"
+                    self.request.request_runtime_ctx.update(key, early_data[1])
                 elif isinstance(early_data, dict):
                     for key, value in early_data.items():
+                        key = key if key.startswith("prompt.") else f"prompt.{ key }"
                         if value != None:
-                            self.request.request_runtime_ctx.delta(f"prompt.{ key }", value)
+                            self.request.request_runtime_ctx.delta(key, value)
                 else:
                     raise Exception("[Agent Component] Early stage return data error: only accept None or Dict({'<request slot name>': <data append to slot>, ... } or Tuple('request slot name', <data append to slot>)")
         # Call Prefix Funcs to Prepare Prefix Data(From agent_runtime_ctx To request_runtime_ctx)
@@ -133,11 +135,13 @@ class Agent(object):
             prefix_data = await prefix_func() if asyncio.iscoroutinefunction(prefix_func) else prefix_func()
             if prefix_data != None:
                 if isinstance(prefix_data, tuple) and isinstance(prefix_data[0], str) and prefix_data[1] != None:
-                    self.request.request_runtime_ctx.update(prefix_data[0], prefix_data[1])
+                    key = prefix_data[0] if prefix_data[0].startswith("prompt.") else f"prompt.{ prefix_data[0] }"
+                    self.request.request_runtime_ctx.update(key, prefix_data[1])
                 elif isinstance(prefix_data, dict):
                     for key, value in prefix_data.items():
+                        key = key if key.startswith("prompt.") else f"prompt.{ key }"
                         if value != None:
-                            self.request.request_runtime_ctx.delta(f"prompt.{ key }", value)
+                            self.request.request_runtime_ctx.delta(key, value)
                 else:
                     raise Exception("[Agent Component] Prefix return data error: only accept None or Dict({'<request slot name>': <data append to slot>, ... } or Tuple('request slot name', <data append to slot>)")
 
