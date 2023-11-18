@@ -2,10 +2,17 @@
 aiohttp
 websockets
 tornado
+
 # Model Client
 openai
 httpx
 erniebot
 zhipuai
+
 # Format
 PyYAML
+pydantic
+
+# Log
+loguru
+

@@ -28,6 +28,7 @@ agent.request.request_runtime_ctx.set("prompt.input", "你是一个专家。")
 # 利用agent实例提供的丰富能力接口进行诉求表达
 # 链式表达的形式，让诉求表达结构清晰有条理
 result = agent \
+    .set_role() \
     .input("给我介绍一下北京周边的景点。") \
     .start()
 # 并在最终获得结构化的数据返回结果
