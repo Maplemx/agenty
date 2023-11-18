@@ -9,9 +9,9 @@ class RuntimeCtxNamespace(NamespaceOps):
 
     def get_trace_back(self, keys_with_dots: (str, None) = None, default: Any = None):
         """
-        :param keys_with_dots: ()
+        :param keys_with_dots:
         :type keys_with_dots: tuple
-        :param default:
+        :param default: 默认值
         :type default: Any
         :return:
         """
