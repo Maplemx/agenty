@@ -1,10 +1,20 @@
+from typing import Any
+
 from .DataOps import DataOps, NamespaceOps
+
 
 class RuntimeCtxNamespace(NamespaceOps):
     def __init__(self, namespace_name: str, runtime_ctx: object, *, return_to: object=None):
         super().__init__(namespace_name, runtime_ctx, return_to = return_to)
 
-    def get_trace_back(self, keys_with_dots: (str, None) = None, default: str=None):
+    def get_trace_back(self, keys_with_dots: (str, None) = None, default: Any = None):
+        """
+        :param keys_with_dots: ()
+        :type keys_with_dots: tuple
+        :param default:
+        :type default: Any
+        :return:
+        """
         return self.data_ops.get_trace_back(f"{ self.namespace_name }.{ keys_with_dots }" if keys_with_dots else self.namespace_name, default)
 
 class RuntimeCtx(DataOps):
