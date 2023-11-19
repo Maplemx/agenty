@@ -1,7 +1,10 @@
 import copy
 
+from src.utils import RuntimeCtx
+
+
 class NamespaceOps(object):
-    def __init__(self, namespace_name: str, data_ops: object, *, return_to: object=None):
+    def __init__(self, namespace_name: str, data_ops: RuntimeCtx, *, return_to: object=None):
         self.namespace_name = namespace_name
         self.data_ops = data_ops
         self.return_to = return_to if return_to else self

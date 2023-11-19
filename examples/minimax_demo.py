@@ -18,18 +18,14 @@ agent_factory = AgentFactory(is_debug=True)
 # 创建一个Agent实例
 agent = agent_factory.create_agent()
 agent \
-    .set_settings("model_settings.model_name", "MiniMax") \
+    .set_settings("current_model", "MiniMax") \
     .set_settings("model_settings.auth", {"api_key": api_key, "group_id": group_id}) \
     .set_settings("model_settings.options", {})
-agent.request.request_runtime_ctx.set("request_type", "chat")
-agent.request.request_runtime_ctx.set("prompt.input", "你是一个专家。")
-
 
 # 利用agent实例提供的丰富能力接口进行诉求表达
 # 链式表达的形式，让诉求表达结构清晰有条理
 result = agent \
-    .set_role() \
     .input("给我介绍一下北京周边的景点。") \
-    .start()
+    .start(request_type="chat")
 # 并在最终获得结构化的数据返回结果
 print(result)

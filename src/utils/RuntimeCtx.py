@@ -1,13 +1,13 @@
-from typing import Any
-
+from __future__ import annotations
+from typing import Any, Optional
 from .DataOps import DataOps, NamespaceOps
 
 
 class RuntimeCtxNamespace(NamespaceOps):
-    def __init__(self, namespace_name: str, runtime_ctx: object, *, return_to: object=None):
-        super().__init__(namespace_name, runtime_ctx, return_to = return_to)
+    def __init__(self, namespace_name: str, runtime_ctx: RuntimeCtx, *, return_to: object = None):
+        super().__init__(namespace_name, runtime_ctx, return_to=return_to)
 
-    def get_trace_back(self, keys_with_dots: (str, None) = None, default: Any = None):
+    def get_trace_back(self, keys_with_dots: Optional[str] = None, default: Any = None):
         """
         :param keys_with_dots:
         :type keys_with_dots: tuple
@@ -15,13 +15,16 @@ class RuntimeCtxNamespace(NamespaceOps):
         :type default: Any
         :return:
         """
-        return self.data_ops.get_trace_back(f"{ self.namespace_name }.{ keys_with_dots }" if keys_with_dots else self.namespace_name, default)
+        return self.data_ops.get_trace_back(
+            f"{self.namespace_name}.{keys_with_dots}" if keys_with_dots else self.namespace_name,
+            default)
+
 
 class RuntimeCtx(DataOps):
-    def __init__ (self, *, parent: object=None, no_copy: bool=False):
+    def __init__(self, *, parent: RuntimeCtx = None, no_copy: bool = False):
         self.parent = parent
         self.runtime_ctx_storage = {}
-        super().__init__(target_data = self.runtime_ctx_storage, no_copy = no_copy)
+        super().__init__(target_data=self.runtime_ctx_storage, no_copy=no_copy)
 
     def __update_trace_back_result(self, parent_result, result):
         for key in result:
@@ -35,7 +38,7 @@ class RuntimeCtx(DataOps):
                 parent_result[key] = result[key]
         return parent_result
 
-    def get_trace_back(self, keys_with_dots: (str, None) = None, default: str=None):
+    def get_trace_back(self, keys_with_dots: Optional[str] = None, default: Any = None):
         result = self.get(keys_with_dots)
         parent_result = self.parent.get_trace_back(keys_with_dots) if self.parent else None
         if result or parent_result:

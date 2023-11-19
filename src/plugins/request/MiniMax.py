@@ -392,7 +392,7 @@ class MiniMax(RequestABC):
         request_runtime_ctx = self.request.request_runtime_ctx
         stream = request_runtime_ctx.get("stream", False)
 
-        texts = self.request.request_runtime_ctx.get("prompt.input")
+        texts = request_runtime_ctx.get("prompt.input")
         texts = texts if isinstance(texts, list) else [texts]
         if self.request_type.lower() == "chat_pro":
             sender_type = request_runtime_ctx.get("sender_type", "USER")
