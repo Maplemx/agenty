@@ -205,10 +205,14 @@ class Agent(object):
             reply_queue.put_nowait(reply)
         theard = threading.Thread(target=start_in_theard)
         theard.start()
-        theard.join()        
-        reply = reply_queue.get_nowait()
+        theard.join()
+        try:        
+            reply = reply_queue.get_nowait()
+        except:
+            reply = None
         return reply
 
+    '''
     def auto_func(self, func: callable):
         def wrapper(*args, **kwargs):
             # generate input dict
@@ -230,6 +234,7 @@ class Agent(object):
                     .start()
             )
         return wrapper
+    '''
 
     def start_websocket_server(self, port:int=15365):
         is_debug = self.settings.get_trace_back("is_debug")
