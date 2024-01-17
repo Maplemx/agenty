@@ -60,7 +60,7 @@ class ZhipuAI(RequestABC):
             if prompt_output_data:
                 if isinstance(prompt_output_data, (dict, list, set)):
                     prompt_dict["[输出要求]"] = {
-                        "TYPE": "JSON can be parsed in Python",
+                        "TYPE": "JSON can be parsed in runtime",
                         "FORMAT": to_json_desc(prompt_output_data),
                     }
                     self.request.request_runtime_ctx.set("response:type", "JSON")
@@ -114,7 +114,7 @@ class ZhipuAI(RequestABC):
             if prompt_output_data:
                 if isinstance(prompt_output_data, (dict, list, set)):
                     prompt_dict["[输出要求]"] = {
-                        "TYPE": "JSON can be parsed in Python",
+                        "TYPE": "JSON can be parsed in runtime",
                         "FORMAT": to_json_desc(prompt_output_data),
                     }
                     self.request.request_runtime_ctx.set("response:type", "JSON")
