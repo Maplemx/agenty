@@ -77,7 +77,7 @@ class Google(RequestABC):
             if prompt_output_data:
                 if isinstance(prompt_output_data, (dict, list, set)):
                     prompt_dict["[OUTPUT REQUIREMENT]"] = {
-                        "TYPE": "JSON can be parsed in Python",
+                        "TYPE": "JSON can be parsed in runtime",
                         "FORMAT": to_json_desc(prompt_output_data),
                     }
                     self.request.request_runtime_ctx.set("response:type", "JSON")
@@ -99,12 +99,14 @@ class Google(RequestABC):
         proxy = self.request.settings.get_trace_back("proxy")
         messages = request_data["messages"]
         options = request_data["options"]
-        proxy = self.request.settings.get_trace_back("proxy")
         request_params = { 
             "data": json.dumps({ "contents": messages, **options }),
             "timeout": None,
         }
-        async with httpx.AsyncClient(proxy=proxy) as client:
+        client_params = {}
+        if proxy:
+            client_params["proxy"] = proxy
+        async with httpx.AsyncClient(**client_params) as client:
             async with client.stream(
                 "POST",
                 f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:streamGenerateContent?key={ api_key }",
