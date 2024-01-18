@@ -70,10 +70,10 @@ class Tool(ComponentABC):
                 })
                 .info("current date", datetime.now().date())
                 .info("tools", json.dumps(tool_list))
-                .instruct("make plans to achieve {input.target}.\n * if use search tool, choose ONLY ONE SEARCH TOOL THAT FIT MOST.")
+                .instruct("what tools to use for achieving {input.target}.\n * if use search tool, choose ONLY ONE SEARCH TOOL THAT FIT MOST and use the same language as {input.target}.")
                 .output({
-                    "plans": [{
-                        "step_goal": ("String", "brief goal of this step"),
+                    "tools_using": [{
+                        "purpose": ("String", "what question you want to use tool to solve?"),
                         "using_tool": (
                             {
                                 "tool_name": ("String", "{tool_name} from {tools}"),
@@ -86,7 +86,7 @@ class Tool(ComponentABC):
                 .start()
         )
         tool_results = {}
-        for step in result["plans"]:
+        for step in result["tools_using"]:
             if "using_tool" in step and isinstance(step["using_tool"], dict) and "tool_name" in step["using_tool"]:
                 if self.is_debug:
                     print("[Using Tool]: ", step["using_tool"])
@@ -109,7 +109,7 @@ class Tool(ComponentABC):
                         if self.is_debug:
                             print("[Tool Error]: ", e)
                     if call_result:
-                        info_key = json.dumps(step["step_goal"])
+                        info_key = str(step["purpose"])
                         info_value = call_result["for_agent"] if isinstance(call_result, dict) and "for_agent" in call_result else call_result
                         tool_results[info_key] = info_value
                         if self.is_debug:
@@ -150,7 +150,8 @@ class Tool(ComponentABC):
             tool_results = self.call_plan_func(self)
             if tool_results and len(tool_results.keys()) > 0:
                 return {
-                    "information": tool_results
+                    "information": tool_results,
+                    "instruction": ["using markdown format: [keywords](url) to mark info source in your answer."]
                 }
             else:
                 return None
